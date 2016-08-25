@@ -1,0 +1,709 @@
+<gate.util.persistence.GateApplication>
+  <urlList class="gate.util.persistence.CollectionPersistence">
+    <localList>
+      <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$relpath$../../../../ties5/GATE/plugins/ANNIE/</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>
+      <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$relpath$../../../../ties5/GATE/plugins/Tagger_MetaMap/</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>
+      <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$gatehome$plugins/ANNIE/</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>
+      <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$gatehome$plugins/Tagger_MetaMap/</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>
+      <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$relpath$../gate/</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>
+    </localList>
+    <collectionType>java.util.ArrayList</collectionType>
+  </urlList>
+  <application class="gate.util.persistence.SerialAnalyserControllerPersistence">
+    <corpus class="gate.util.persistence.CorpusPersistence">
+      <dsData class="gate.util.persistence.DSPersistence">
+        <className>gate.persist.SerialDataStore</className>
+        <storageUrlString>file:/C:/ws/DeepPhe/NobleCoderGateProcessingResource/sd/</storageUrlString>
+        <storageUrl class="gate.util.persistence.PersistenceManager$URLHolder">
+          <urlString>$relpath$../../../NobleCoderGateProcessingResource/sd/</urlString>
+        </storageUrl>
+      </dsData>
+      <persistenceID class="string">CorpusDeepPhe001___1409161655207___4187</persistenceID>
+      <resourceType>gate.corpora.SerialCorpusImpl</resourceType>
+      <resourceName>CorpusDeepPhe001</resourceName>
+      <initParams class="gate.util.persistence.MapPersistence">
+        <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+        <localMap/>
+      </initParams>
+    </corpus>
+    <prList class="gate.util.persistence.CollectionPersistence">
+      <localList>
+        <gate.util.persistence.PRPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>setsToKeep</string>
+                <gate.util.persistence.CollectionPersistence>
+                  <localList>
+                    <string>Key</string>
+                  </localList>
+                  <collectionType>java.util.ArrayList</collectionType>
+                </gate.util.persistence.CollectionPersistence>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>annotationTypes</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>corpus</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>setsToRemove</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>keepOriginalMarkupsAS</string>
+                <boolean>true</boolean>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.creole.annotdelete.AnnotationDeletePR</resourceType>
+          <resourceName>DeepPhe Resetter</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.PRPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>annotationSetName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>corpus</string>
+                <null/>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.creole.tokeniser.DefaultTokeniser</resourceType>
+          <resourceName>DeepPhe Tokeniser</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>encoding</string>
+                <string>UTF-8</string>
+              </entry>
+              <entry>
+                <string>tokeniserRulesURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../../../ties5/GATE/plugins/ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>transducerGrammarURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../../../ties5/GATE/plugins/ANNIE/resources/tokeniser/postprocess.jape</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.LanguageAnalyserPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>outputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>corpus</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.creole.splitter.SentenceSplitter</resourceType>
+          <resourceName>Deep Phe Sentence Splitter</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>encoding</string>
+                <string>UTF-8</string>
+              </entry>
+              <entry>
+                <string>gazetteerListsURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../../../ties5/GATE/plugins/ANNIE/resources/sentenceSplitter/gazetteer/lists.def</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>transducerURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../../../ties5/GATE/plugins/ANNIE/resources/sentenceSplitter/grammar/main-single-nl.jape</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.LanguageAnalyserPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>ignoreSmallWords</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>outputAnnotationType</string>
+                <string></string>
+              </entry>
+              <entry>
+                <string>ignoreUsedWords</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>defaultSearchMethod</string>
+                <string>best-match</string>
+              </entry>
+              <entry>
+                <string>ignoreCommonWords</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>inputAnnotationType</string>
+                <string></string>
+              </entry>
+              <entry>
+                <string>sources</string>
+                <gate.util.persistence.CollectionPersistence>
+                  <localList>
+                    <string>AIR</string>
+                    <string>ALT</string>
+                    <string>AOD</string>
+                    <string>AOT</string>
+                    <string>ATC</string>
+                    <string>BI</string>
+                    <string>CCC</string>
+                    <string>CCPSS</string>
+                    <string>CCS</string>
+                    <string>CDT</string>
+                    <string>CHV</string>
+                    <string>COSTAR</string>
+                    <string>CPM</string>
+                    <string>CPT</string>
+                    <string>CSP</string>
+                    <string>CST</string>
+                    <string>CVX</string>
+                    <string>DDB</string>
+                    <string>DSM3R</string>
+                    <string>DSM4</string>
+                    <string>DXP</string>
+                    <string>FMA</string>
+                    <string>GO</string>
+                    <string>GS</string>
+                    <string>HCDT</string>
+                    <string>HCPCS</string>
+                    <string>HCPT</string>
+                    <string>HGNC</string>
+                    <string>HL7V2.5</string>
+                    <string>HL7V3.0</string>
+                    <string>ICD10</string>
+                    <string>ICD10AE</string>
+                    <string>ICD10AM</string>
+                    <string>ICD10AMAE</string>
+                    <string>ICD10CM</string>
+                    <string>ICD10PCS</string>
+                    <string>ICD9CM</string>
+                    <string>ICF</string>
+                    <string>ICF-CY</string>
+                    <string>ICNP</string>
+                    <string>ICPC</string>
+                    <string>ICPC2EENG</string>
+                    <string>ICPC2ICD10ENG</string>
+                    <string>ICPC2P</string>
+                    <string>JABL</string>
+                    <string>LCH</string>
+                    <string>LNC</string>
+                    <string>MCM</string>
+                    <string>MDDB</string>
+                    <string>MDR</string>
+                    <string>MEDCIN</string>
+                    <string>MEDLINEPLUS</string>
+                    <string>MMSL</string>
+                    <string>MMX</string>
+                    <string>MSH</string>
+                    <string>MTH</string>
+                    <string>MTHFDA</string>
+                    <string>MTHHH</string>
+                    <string>MTHICD9</string>
+                    <string>MTHICPC2EAE</string>
+                    <string>MTHICPC2ICD10AE</string>
+                    <string>MTHMST</string>
+                    <string>MTHSPL</string>
+                    <string>NAN</string>
+                    <string>NCBI</string>
+                    <string>NCI</string>
+                    <string>NDDF</string>
+                    <string>NDFRT</string>
+                    <string>NEU</string>
+                    <string>NIC</string>
+                    <string>NOC</string>
+                    <string>OMIM</string>
+                    <string>OMS</string>
+                    <string>PCDS</string>
+                    <string>PDQ</string>
+                    <string>PNDS</string>
+                    <string>PPAC</string>
+                    <string>PSY</string>
+                    <string>QMR</string>
+                    <string>RAM</string>
+                    <string>RCD</string>
+                    <string>RCDAE</string>
+                    <string>RCDSA</string>
+                    <string>RCDSY</string>
+                    <string>RXNORM</string>
+                    <string>SNM</string>
+                    <string>SNMI</string>
+                    <string>SNOMEDCT_US</string>
+                    <string>SNOMEDCT_VET</string>
+                    <string>SOP</string>
+                    <string>SPN</string>
+                    <string>SRC</string>
+                    <string>ULT</string>
+                    <string>UMD</string>
+                    <string>USPMG</string>
+                    <string>UWDA</string>
+                    <string>VANDF</string>
+                    <string>WHO</string>
+                  </localList>
+                  <collectionType>java.util.ArrayList</collectionType>
+                </gate.util.persistence.CollectionPersistence>
+              </entry>
+              <entry>
+                <string>languages</string>
+                <gate.util.persistence.CollectionPersistence>
+                  <localList>
+                    <string>ENG</string>
+                  </localList>
+                  <collectionType>java.util.ArrayList</collectionType>
+                </gate.util.persistence.CollectionPersistence>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>selectBestCandidate</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>debugging</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>scoreConcepts</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>ignoreDigits</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>overlapMode</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>stys</string>
+                <gate.util.persistence.CollectionPersistence>
+                  <localList>
+                    <string>Organism</string>
+                    <string>Plant</string>
+                    <string>Fungus</string>
+                    <string>Virus</string>
+                    <string>Bacterium</string>
+                    <string>Animal</string>
+                    <string>Vertebrate</string>
+                    <string>Amphibian</string>
+                    <string>Bird</string>
+                    <string>Fish</string>
+                    <string>Reptile</string>
+                    <string>Mammal</string>
+                    <string>Human</string>
+                    <string>Anatomical Structure</string>
+                    <string>Embryonic Structure</string>
+                    <string>Congenital Abnormality</string>
+                    <string>Acquired Abnormality</string>
+                    <string>Fully Formed Anatomical Structure</string>
+                    <string>Body System</string>
+                    <string>Body Part, Organ, or Organ Component</string>
+                    <string>Tissue</string>
+                    <string>Cell</string>
+                    <string>Cell Component</string>
+                    <string>Gene or Genome</string>
+                    <string>Body Location or Region</string>
+                    <string>Body Space or Junction</string>
+                    <string>Body Substance</string>
+                    <string>Organism Attribute</string>
+                    <string>Finding</string>
+                    <string>Laboratory or Test Result</string>
+                    <string>Injury or Poisoning</string>
+                    <string>Biologic Function</string>
+                    <string>Physiologic Function</string>
+                    <string>Organism Function</string>
+                    <string>Mental Process</string>
+                    <string>Organ or Tissue Function</string>
+                    <string>Cell Function</string>
+                    <string>Molecular Function</string>
+                    <string>Genetic Function</string>
+                    <string>Pathologic Function</string>
+                    <string>Disease or Syndrome</string>
+                    <string>Mental or Behavioral Dysfunction</string>
+                    <string>Cell or Molecular Dysfunction</string>
+                    <string>Experimental Model of Disease</string>
+                    <string>Event</string>
+                    <string>Activity</string>
+                    <string>Behavior</string>
+                    <string>Social Behavior</string>
+                    <string>Individual Behavior</string>
+                    <string>Daily or Recreational Activity</string>
+                    <string>Occupational Activity</string>
+                    <string>Health Care Activity</string>
+                    <string>Laboratory Procedure</string>
+                    <string>Diagnostic Procedure</string>
+                    <string>Therapeutic or Preventive Procedure</string>
+                    <string>Research Activity</string>
+                    <string>Molecular Biology Research Technique</string>
+                    <string>Governmental or Regulatory Activity</string>
+                    <string>Educational Activity</string>
+                    <string>Machine Activity</string>
+                    <string>Phenomenon or Process</string>
+                    <string>Human-caused Phenomenon or Process</string>
+                    <string>Environmental Effect of Humans</string>
+                    <string>Natural Phenomenon or Process</string>
+                    <string>Entity</string>
+                    <string>Physical Object</string>
+                    <string>Manufactured Object</string>
+                    <string>Medical Device</string>
+                    <string>Research Device</string>
+                    <string>Conceptual Entity</string>
+                    <string>Idea or Concept</string>
+                    <string>Temporal Concept</string>
+                    <string>Qualitative Concept</string>
+                    <string>Quantitative Concept</string>
+                    <string>Spatial Concept</string>
+                    <string>Geographic Area</string>
+                    <string>Molecular Sequence</string>
+                    <string>Nucleotide Sequence</string>
+                    <string>Amino Acid Sequence</string>
+                    <string>Carbohydrate Sequence</string>
+                    <string>Regulation or Law</string>
+                    <string>Occupation or Discipline</string>
+                    <string>Biomedical Occupation or Discipline</string>
+                    <string>Organization</string>
+                    <string>Health Care Related Organization</string>
+                    <string>Professional Society</string>
+                    <string>Self-help or Relief Organization</string>
+                    <string>Group</string>
+                    <string>Professional or Occupational Group</string>
+                    <string>Population Group</string>
+                    <string>Family Group</string>
+                    <string>Age Group</string>
+                    <string>Patient or Disabled Group</string>
+                    <string>Group Attribute</string>
+                    <string>Chemical</string>
+                    <string>Chemical Viewed Structurally</string>
+                    <string>Organic Chemical</string>
+                    <string>Steroid</string>
+                    <string>Eicosanoid</string>
+                    <string>Nucleic Acid, Nucleoside, or Nucleotide</string>
+                    <string>Organophosphorus Compound</string>
+                    <string>Amino Acid, Peptide, or Protein</string>
+                    <string>Carbohydrate</string>
+                    <string>Lipid</string>
+                    <string>Chemical Viewed Functionally</string>
+                    <string>Pharmacologic Substance</string>
+                    <string>Biomedical or Dental Material</string>
+                    <string>Biologically Active Substance</string>
+                    <string>Neuroreactive Substance or Biogenic Amine</string>
+                    <string>Hormone</string>
+                    <string>Enzyme</string>
+                    <string>Vitamin</string>
+                    <string>Immunologic Factor</string>
+                    <string>Indicator, Reagent, or Diagnostic Aid</string>
+                    <string>Hazardous or Poisonous Substance</string>
+                    <string>Substance</string>
+                    <string>Food</string>
+                    <string>Functional Concept</string>
+                    <string>Intellectual Product</string>
+                    <string>Language</string>
+                    <string>Sign or Symptom</string>
+                    <string>Classification</string>
+                    <string>Anatomical Abnormality</string>
+                    <string>Neoplastic Process</string>
+                    <string>Receptor</string>
+                    <string>Archaeon</string>
+                    <string>Antibiotic</string>
+                    <string>Element, Ion, or Isotope</string>
+                    <string>Inorganic Chemical</string>
+                    <string>Clinical Drug</string>
+                    <string>Clinical Attribute</string>
+                    <string>Drug Delivery Device</string>
+                    <string>Eukaryote</string>
+                  </localList>
+                  <collectionType>java.util.ArrayList</collectionType>
+                </gate.util.persistence.CollectionPersistence>
+              </entry>
+              <entry>
+                <string>windowSize</string>
+                <int>-1</int>
+              </entry>
+              <entry>
+                <string>orderedMode</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>inputAS</string>
+                <string></string>
+              </entry>
+              <entry>
+                <string>subsumptionMode</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>contiguousMode</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>corpus</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>partialMode</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>outputAS</string>
+                <string></string>
+              </entry>
+              <entry>
+                <string>cachingEnabled</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>tuis</string>
+                <gate.util.persistence.CollectionPersistence>
+                  <localList>
+                    <string>T001</string>
+                    <string>T002</string>
+                    <string>T004</string>
+                    <string>T005</string>
+                    <string>T007</string>
+                    <string>T008</string>
+                    <string>T010</string>
+                    <string>T011</string>
+                    <string>T012</string>
+                    <string>T013</string>
+                    <string>T014</string>
+                    <string>T015</string>
+                    <string>T016</string>
+                    <string>T017</string>
+                    <string>T018</string>
+                    <string>T019</string>
+                    <string>T020</string>
+                    <string>T021</string>
+                    <string>T022</string>
+                    <string>T023</string>
+                    <string>T024</string>
+                    <string>T025</string>
+                    <string>T026</string>
+                    <string>T028</string>
+                    <string>T029</string>
+                    <string>T030</string>
+                    <string>T031</string>
+                    <string>T032</string>
+                    <string>T033</string>
+                    <string>T034</string>
+                    <string>T037</string>
+                    <string>T038</string>
+                    <string>T039</string>
+                    <string>T040</string>
+                    <string>T041</string>
+                    <string>T042</string>
+                    <string>T043</string>
+                    <string>T044</string>
+                    <string>T045</string>
+                    <string>T046</string>
+                    <string>T047</string>
+                    <string>T048</string>
+                    <string>T049</string>
+                    <string>T050</string>
+                    <string>T051</string>
+                    <string>T052</string>
+                    <string>T053</string>
+                    <string>T054</string>
+                    <string>T055</string>
+                    <string>T056</string>
+                    <string>T057</string>
+                    <string>T058</string>
+                    <string>T059</string>
+                    <string>T060</string>
+                    <string>T061</string>
+                    <string>T062</string>
+                    <string>T063</string>
+                    <string>T064</string>
+                    <string>T065</string>
+                    <string>T066</string>
+                    <string>T067</string>
+                    <string>T068</string>
+                    <string>T069</string>
+                    <string>T070</string>
+                    <string>T071</string>
+                    <string>T072</string>
+                    <string>T073</string>
+                    <string>T074</string>
+                    <string>T075</string>
+                    <string>T077</string>
+                    <string>T078</string>
+                    <string>T079</string>
+                    <string>T080</string>
+                    <string>T081</string>
+                    <string>T082</string>
+                    <string>T083</string>
+                    <string>T085</string>
+                    <string>T086</string>
+                    <string>T087</string>
+                    <string>T088</string>
+                    <string>T089</string>
+                    <string>T090</string>
+                    <string>T091</string>
+                    <string>T092</string>
+                    <string>T093</string>
+                    <string>T094</string>
+                    <string>T095</string>
+                    <string>T096</string>
+                    <string>T097</string>
+                    <string>T098</string>
+                    <string>T099</string>
+                    <string>T100</string>
+                    <string>T101</string>
+                    <string>T102</string>
+                    <string>T103</string>
+                    <string>T104</string>
+                    <string>T109</string>
+                    <string>T110</string>
+                    <string>T111</string>
+                    <string>T114</string>
+                    <string>T115</string>
+                    <string>T116</string>
+                    <string>T118</string>
+                    <string>T119</string>
+                    <string>T120</string>
+                    <string>T121</string>
+                    <string>T122</string>
+                    <string>T123</string>
+                    <string>T124</string>
+                    <string>T125</string>
+                    <string>T126</string>
+                    <string>T127</string>
+                    <string>T129</string>
+                    <string>T130</string>
+                    <string>T131</string>
+                    <string>T167</string>
+                    <string>T168</string>
+                    <string>T169</string>
+                    <string>T170</string>
+                    <string>T171</string>
+                    <string>T184</string>
+                    <string>T185</string>
+                    <string>T190</string>
+                    <string>T191</string>
+                    <string>T192</string>
+                    <string>T194</string>
+                    <string>T195</string>
+                    <string>T196</string>
+                    <string>T197</string>
+                    <string>T200</string>
+                    <string>T201</string>
+                    <string>T203</string>
+                    <string>T204</string>
+                  </localList>
+                  <collectionType>java.util.ArrayList</collectionType>
+                </gate.util.persistence.CollectionPersistence>
+              </entry>
+              <entry>
+                <string>terminologyURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$resources/umls/META.term/info.txt</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>ignoreAcronyms</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>stemWords</string>
+                <boolean>false</boolean>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>edu.pitt.dbmi.nobletools.gate.NobleCoderGateProcessingResource</resourceType>
+          <resourceName>NobleCoderGateProcessingResource_00014</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.LanguageAnalyserPersistence>
+      </localList>
+      <collectionType>java.util.ArrayList</collectionType>
+    </prList>
+    <resourceType>gate.creole.SerialAnalyserController</resourceType>
+    <resourceName>Deep Phe Pipeline</resourceName>
+    <initParams class="gate.util.persistence.MapPersistence">
+      <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+      <localMap/>
+    </initParams>
+    <features class="gate.util.persistence.MapPersistence">
+      <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+      <localMap/>
+    </features>
+  </application>
+</gate.util.persistence.GateApplication>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
+  <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
+  <primitive>false</primitive>  
+  <delegateAnalysisEngineSpecifiers>
+    <delegateAnalysisEngine key="NobleCoderSentenceAnnotator">
+      <import location="../primitive/NobleCoderSentenceAnnotator.xml"/>
+    </delegateAnalysisEngine>
+  <delegateAnalysisEngine key="NobleCoderEntityAnnotator">
+      <import location="../primitive/NobleCoderEntityAnnotator.xml"/>
+    </delegateAnalysisEngine>
+  </delegateAnalysisEngineSpecifiers>
+  <analysisEngineMetaData>
+    <name>NobleCoderPipeline</name>
+    <description>NobleCoder UIMA pipeline</description>
+    <version>1.0</version>
+    <vendor/>
+    <configurationParameters searchStrategy="language_fallback"/>
+    <configurationParameterSettings/>
+    <flowConstraints>
+      <fixedFlow>
+        <node>NobleCoderSentenceAnnotator</node>
+      	<node>NobleCoderEntityAnnotator</node>
+      </fixedFlow>
+    </flowConstraints>
+    <typePriorities/>
+    <fsIndexCollection/>
+    <capabilities>
+      <capability>
+        <inputs/>
+        <outputs>
+          <type allAnnotatorFeatures="true">edu.pitt.dbmi.nlp.noble.uima.types.Concept</type>
+          <type allAnnotatorFeatures="true">edu.pitt.dbmi.nlp.noble.uima.types.Modifier</type>
+       	  <type allAnnotatorFeatures="true">edu.pitt.dbmi.nlp.noble.uima.types.Sentence</type>
+          <type allAnnotatorFeatures="true">edu.pitt.dbmi.nlp.noble.uima.types.SynopticSection</type>
+          <type allAnnotatorFeatures="true">edu.pitt.dbmi.nlp.noble.uima.types.SemanticType</type>
+          <type allAnnotatorFeatures="true">edu.pitt.dbmi.nlp.noble.uima.types.Section</type>
+          <type allAnnotatorFeatures="true">edu.pitt.dbmi.nlp.noble.uima.types.Part</type>
+        </outputs>
+        <languagesSupported/>
+      </capability>
+    </capabilities>
+  <operationalProperties>
+      <modifiesCas>true</modifiesCas>
+      <multipleDeploymentAllowed>true</multipleDeploymentAllowed>
+      <outputsNewCASes>false</outputsNewCASes>
+    </operationalProperties>
+  </analysisEngineMetaData>
+  <resourceManagerConfiguration>
+    </resourceManagerConfiguration>
+</analysisEngineDescription>

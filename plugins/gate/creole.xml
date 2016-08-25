@@ -1,0 +1,15 @@
+<!-- creole.xml NobleCoderGateProcessingResource -->
+<!--  mitchellkj, 25/8/2014 -->
+
+<!--
+This file just references the JAR file that contains the compiled resource.
+Configuration is contained in the @CreoleResource annotation on 
+edu.pitt.dbmi.nobletools.gate.NobleCoderGateProcessingResource.
+-->
+
+<CREOLE-DIRECTORY>
+  <JAR SCAN="true">NobleCoderGateProcessingResource.jar</JAR>
+  <JAR SCAN="true">lib/NobleTools.jar</JAR>
+  <JAR SCAN="true">lib/jdbm-3.0.jar</JAR>
+  <JAR SCAN="true">lib/commons-lang3-3.3.2.jar</JAR>
+</CREOLE-DIRECTORY>

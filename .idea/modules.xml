@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/plugins/gate/gate.iml" filepath="$PROJECT_DIR$/plugins/gate/gate.iml" />
-      <module fileurl="file://$PROJECT_DIR$/plugins/uima/src/main/main.iml" filepath="$PROJECT_DIR$/plugins/uima/src/main/main.iml" />
       <module fileurl="file://$PROJECT_DIR$/nobletools.iml" filepath="$PROJECT_DIR$/nobletools.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plugins/uima/src/main/uima.iml" filepath="$PROJECT_DIR$/plugins/uima/src/main/uima.iml" />
     </modules>
   </component>
 </project>

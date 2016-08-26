@@ -64,7 +64,7 @@ public class OResource implements IResource{
 	}
 
 	public String getName() {
-		String nm = getIRI().getFragment();
+		String nm = getIRI().toURI().getFragment();
 		if(nm == null){
 			nm = getURI().getFragment();
 		}

@@ -1,8 +1,10 @@
 package edu.pitt.dbmi.nlp.noble.tools;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,6 +28,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import edu.pitt.dbmi.nlp.noble.util.Sender;
 
@@ -386,18 +390,7 @@ public class TextTools {
 	 * you should delete newlines
 	 */
 	public static String getText(InputStream in, String lineSeparator) throws IOException {
-		StringBuffer strBuf = new StringBuffer();
-		BufferedReader buf = new BufferedReader(new InputStreamReader(in));
-		try {
-			for (String line = buf.readLine(); line != null; line = buf.readLine()) {
-				strBuf.append(line + lineSeparator );
-			}
-		} catch (IOException ex) {
-			throw ex;
-		} finally {
-			buf.close();
-		}
-		return strBuf.toString();
+		return FileTools.getText(in, lineSeparator);
 	}
 	
 	
@@ -1363,6 +1356,8 @@ public class TextTools {
 		}
 		return null;
 	}
+	
+	
 	
 	public static void main(String [] s) throws Exception{
 		// test plurality

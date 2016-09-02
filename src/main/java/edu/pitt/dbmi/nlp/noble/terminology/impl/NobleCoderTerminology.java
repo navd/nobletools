@@ -346,7 +346,9 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 		}
 	}
 
-	
+	public boolean isCompacted(){
+		return compacted;
+	}
 	
 	
 	public boolean isCachingEnabled() {
@@ -584,6 +586,11 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 			ex.printStackTrace();
 		}
 	}
+	
+	public Map<String,String> getTerminologyProperties(){
+		return storage.getInfoMap();
+	}
+	
 	
 	/**
 	 * get properties map with search options

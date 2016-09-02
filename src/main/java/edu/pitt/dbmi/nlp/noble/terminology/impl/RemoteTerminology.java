@@ -204,13 +204,13 @@ public class RemoteTerminology extends AbstractTerminology {
 		return ""+getURI();
 	}
 
-	@Override
+	
 	public SemanticType[] getSemanticTypeFilter() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public void setSemanticTypeFilter(SemanticType[] srcs) {
 		// TODO Auto-generated method stub
 		

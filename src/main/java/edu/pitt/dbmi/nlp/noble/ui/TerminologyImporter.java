@@ -70,8 +70,8 @@ import edu.pitt.dbmi.nlp.noble.util.StringUtils;
  */
 public class TerminologyImporter implements ItemListener, ActionListener, PropertyChangeListener {
 	private final String [] FORMAT_NAMES = new String [] 
-	{"UMLS/Metathesaurus RRF Directory","OWL Ontology","OBO Taxonomy","BioPortal Ontology"}; //,"Terminology Text File",
-	private final String [] FORMAT_ARGS = new String [] {"-rrf","-owl","-obo","-bioportal"}; //,,"-txt"
+	{"UMLS/Metathesaurus RRF Directory","OWL Ontology","OBO Taxonomy","BioPortal Ontology","Terminology Text File"};
+	private final String [] FORMAT_ARGS = new String [] {"-rrf","-owl","-obo","-bioportal","-txt"};
 	private JFrame frame;
 	private JComboBox inputFormats;
 	private JTextField inputLocation,outputLocation,semanticTypeList,sourceList,languageList,memSize;
@@ -539,9 +539,9 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 			switch(inputFormats.getSelectedIndex()){
 			case 0: inputLabel.setText("Input RRF Directory");options.setEnabled(true);break;
 			case 1: inputLabel.setText("Input OWL File");options.setEnabled(true); break;
-			case 2: inputLabel.setText("Input OBO File");options.setEnabled(true);break;
+			case 2: inputLabel.setText("Input OBO File");break;
 			case 3: inputLabel.setText("Input BioPortal URL");break;
-			//case 3: inputLabel.setText("Input Text File");break;
+			case 4: inputLabel.setText("Input Text File");break;
 		
 			}
 		}

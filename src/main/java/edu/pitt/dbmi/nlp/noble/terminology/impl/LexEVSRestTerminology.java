@@ -258,25 +258,25 @@ public class LexEVSRestTerminology extends AbstractTerminology {
 	
 	
 
-	@Override
+	
 	public Source[] getSourceFilter() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Concept[] getRelatedConcepts(Concept c, Relation r) throws TerminologyException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Map getRelatedConcepts(Concept c) throws TerminologyException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Source[] getSources() {
 		// TODO Auto-generated method stub
 		return null;
@@ -319,7 +319,7 @@ public class LexEVSRestTerminology extends AbstractTerminology {
 		}
 	}
 
-	@Override
+	
 	public void setSourceFilter(Source[] srcs) {
 		// TODO Auto-generated method stub
 
@@ -406,13 +406,13 @@ public class LexEVSRestTerminology extends AbstractTerminology {
 		System.out.println("lookup time "+(System.currentTimeMillis()-time));
 	}
 
-	@Override
+	
 	public SemanticType[] getSemanticTypeFilter() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public void setSemanticTypeFilter(SemanticType[] srcs) {
 		// TODO Auto-generated method stub
 		

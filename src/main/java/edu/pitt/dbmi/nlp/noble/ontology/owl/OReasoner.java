@@ -22,13 +22,13 @@ public class OReasoner implements IReasoner {
 		this.ontology = ont;
 	}
 	
-	@Override
+	
 	public void initialize() throws IOntologyException {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
+	
 	public void dispose() {
 		// TODO Auto-generated method stub
 
@@ -46,25 +46,25 @@ public class OReasoner implements IReasoner {
 		return ontology;
 	}
 
-	@Override
+	
 	public IResult[] computeInferredHierarchy() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public IResult[] computeInferredTypes() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public IResult[] computeInferredHierarchy(IClass cls) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public IResult[] computeInferredTypes(IInstance inst) {
 		// TODO Auto-generated method stub
 		return null;

@@ -341,13 +341,13 @@ public class BioPortalTerminology extends AbstractTerminology {
 		System.out.println("lookup time "+(System.currentTimeMillis()-time));
 	}
 
-	@Override
+	
 	public SemanticType[] getSemanticTypeFilter() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public void setSemanticTypeFilter(SemanticType[] srcs) {
 		// TODO Auto-generated method stub
 		

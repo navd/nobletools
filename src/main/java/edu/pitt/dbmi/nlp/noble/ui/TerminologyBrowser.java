@@ -12,6 +12,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeSet;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -24,6 +27,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IRepository;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.terminology.Terminology;
 import edu.pitt.dbmi.nlp.noble.terminology.TerminologyException;
+import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
 
 
 /*
@@ -72,7 +76,7 @@ public class TerminologyBrowser {
 		tabs = new JTabbedPane();
 		tabs.addTab("Search", query);
 		tabs.addTab("Browse", ontologyExplorer);
-		tabs.addTab("Info", infoText);
+		tabs.addTab("Info",new JScrollPane(infoText));
 		tabs.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JTabbedPane t = (JTabbedPane) e.getSource();
@@ -126,14 +130,37 @@ public class TerminologyBrowser {
 	}
 	
 	private void setTerminologyInfo(Terminology t){
-		String desc = "<b>"+t.getName()+"</b> ("+t.getVersion()+")<hr>"+t.getDescription();
-		desc +="<hr>";
-		
-		desc += "Languages: "+Arrays.toString(t.getLanguages())+"<br>";
-		desc += "Sources: "+Arrays.toString(t.getSources())+"<br>";
+		StringBuffer desc = new StringBuffer();
+		desc.append("<h2>"+t.getName()+" ("+t.getVersion()+")</h2><hr>");
+		desc.append("<p>"+t.getDescription()+"</p><br>");
+		/*desc.append("<p>Languages: "+Arrays.toString(t.getLanguages())+"</p>");
+		desc.append("<p>Sources: "+Arrays.toString(t.getSources())+"</p>");*/
 
+		// add other information
+		if(t instanceof NobleCoderTerminology){
+			NobleCoderTerminology term = (NobleCoderTerminology)t;
+			
+			// get terminology properties
+			Map<String,String> info = term.getTerminologyProperties();
+			desc.append("<h3>Terminology Properties</h3>");
+			desc.append("<ul>");
+			for(String key: new TreeSet<String>(info.keySet())){
+				desc.append("<li>"+key+" = "+info.get(key)+"</li>");
+			}
+			desc.append("</ul>");
+			
+			// set search properties
+			Properties prop = term.getSearchProperties();
+			desc.append("<h3>Search Properties</h3>");
+			desc.append("<ul>");
+			for(Object key: new TreeSet(prop.keySet())){
+				desc.append("<li>"+key+" = "+prop.get(key)+"</li>");
+			}
+			desc.append("</ul>");
+		}
 		
-		infoText.setText(desc);
+		infoText.setText(desc.toString());
+		infoText.setCaretPosition(0);
 	}
 	
 	

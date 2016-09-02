@@ -73,6 +73,7 @@ import edu.pitt.dbmi.nlp.noble.terminology.Source;
 import edu.pitt.dbmi.nlp.noble.terminology.Terminology;
 import edu.pitt.dbmi.nlp.noble.terminology.TerminologyException;
 import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
+import edu.pitt.dbmi.nlp.noble.tools.FileTools;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import edu.pitt.dbmi.nlp.noble.util.CSVExporter;
 import edu.pitt.dbmi.nlp.noble.util.HTMLExporter;
@@ -87,6 +88,7 @@ public class NobleCoderTool implements ActionListener{
 	private final URL LOGO_ICON = getClass().getResource("/icons/NobleLogo256.png");
 	private final URL IMPORT_ICON = getClass().getResource("/icons/Import16.gif");
 	private final URL EXPORT_ICON = getClass().getResource("/icons/Export16.gif");
+	private final URL MANAGE_ICON = getClass().getResource("/icons/database16.png");
 	private final URL OPTIONS_ICON = getClass().getResource("/icons/Preferences16.gif");
 	private static final String DEFAULT_TERMINOLOGY_DOWNLOAD = "http://noble-tools.dbmi.pitt.edu/data/NCI_Thesaurus.term.zip";
 	private final String DEFAULT_TERMINOLOGY = "NCI_Thesaurus";
@@ -331,24 +333,30 @@ public class NobleCoderTool implements ActionListener{
 		JMenu helpm = new JMenu("Help");
 		
 		
-		JMenuItem importer = new JMenuItem("Import Terminologies ..",new ImageIcon(IMPORT_ICON));
-		JMenuItem exporter = new JMenuItem("Export Terminologies..",new ImageIcon(EXPORT_ICON));
-		JMenuItem path = new JMenuItem("Repository Location ..");
+		JMenuItem importer = new JMenuItem("Import ..",new ImageIcon(IMPORT_ICON));
+		JMenuItem exporter = new JMenuItem("Export ..",new ImageIcon(EXPORT_ICON));
+		JMenuItem repoManager = new JMenuItem("Manage ..",new ImageIcon(MANAGE_ICON));
+		
+		
+		//JMenuItem path = new JMenuItem("Repository Location ..");
 		JMenuItem help = new JMenuItem("Help");
 		JMenuItem about = new JMenuItem("About");
 		JMenuItem options = new JMenuItem("Runtime Options ..",new ImageIcon(OPTIONS_ICON));
 		
 		importer.setToolTipText("Import terminlogies from RRF/OWL/OBO into NobleCoder repository");
 		exporter.setToolTipText("Export parts of terminologies from NobleCoder repository into an OWL file");
-		path.setToolTipText("Change Terminology Repository Path");	
+		repoManager.setToolTipText("Manage terminologies that are currently loaded");
+		//path.setToolTipText("Change Terminology Repository Path");	
 		options.setToolTipText("Change runtime options of the selected terminology");
 		JMenuItem exit = new JMenuItem("Exit");
 		importer.addActionListener(this);
 		exit.addActionListener(this);
 		importer.setActionCommand("importer");
 		exit.setActionCommand("exit");
-		path.addActionListener(this);
-		path.setActionCommand("path");
+		//path.addActionListener(this);
+		//path.setActionCommand("path");
+		repoManager.setActionCommand("manage");
+		repoManager.addActionListener(this);
 		exporter.setActionCommand("exporter");
 		exporter.addActionListener(this);
 		help.addActionListener(this);
@@ -360,9 +368,11 @@ public class NobleCoderTool implements ActionListener{
 		file.add(importer);
 		file.add(exporter);
 		file.addSeparator();
+		file.add(repoManager);
+		file.addSeparator();
 		opt.add(options);
-		opt.addSeparator();
-		opt.add(path);
+		//opt.addSeparator();
+		//opt.add(path);
 		file.add(exit);
 		helpm.add(help);
 		helpm.add(about);
@@ -399,7 +409,7 @@ public class NobleCoderTool implements ActionListener{
 			doImport();
 		}else if("exporter".equals(cmd)){
 			doExport();
-		}else if("manager".equals(cmd)){
+		}else if("manage".equals(cmd)){
 			doManage();
 		}else if("path".equals(cmd)){
 			doPath();
@@ -474,7 +484,7 @@ public class NobleCoderTool implements ActionListener{
 			imanager = new RepositoryManager(RepositoryManager.TERMINOLOGIES_ONLY);
 			imanager.start(repository);
 			imanager.getFrame().setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-			imanager.getFrame().setLocation(frame.getLocation());
+			imanager.getFrame().setLocationRelativeTo(frame);
 		}else{
 			imanager.getFrame().setVisible(true);
 		}
@@ -1259,7 +1269,7 @@ public class NobleCoderTool implements ActionListener{
 					setBusy(true);
 					URL url = new URL(DEFAULT_TERMINOLOGY_DOWNLOAD);
 					InputStream is = url.openStream();
-					unzip(is,NobleCoderTerminology.getPersistenceDirectory());
+					FileTools.unzip(is,NobleCoderTerminology.getPersistenceDirectory());
 					repository =  new DefaultRepository();
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
@@ -1285,61 +1295,6 @@ public class NobleCoderTool implements ActionListener{
 			}
 		}).start();
 	}
-	
-	/**
-	 * unzip file to directory
-	 * copy/pasted from http://javadevtips.blogspot.com/2011/10/unzip-files.html
-	 * http://www.thecoderscorner.com/team-blog/java-and-jvm/12-reading-a-zip-file-from-java-using-zipinputstream
-	 * and modified
-	 * @param is
-	 * @param destDirectory
-	 * @return
-	 */
-	 public void unzip(InputStream is, File destDirectory) throws Exception {
-		 // create the destination directory structure (if needed)
-		 if(!destDirectory.exists())
-			 destDirectory.mkdirs();
-			 
-		 // create a buffer to improve copy performance later.
-	     byte[] buffer = new byte[2048];
-
-	     // open the zip file stream
-	     ZipInputStream stream = new ZipInputStream(new BufferedInputStream(is));
-	     try {
-
-	    	 // now iterate through each item in the stream. The get next
-	         // entry call will return a ZipEntry for each file in the
-	         // stream
-	         ZipEntry entry;
-	         while((entry = stream.getNextEntry())!=null) {
-	        	 // Once we get the entry from the stream, the stream is
-	             // positioned read to read the raw data, and we keep
-	             // reading until read returns 0 or less.
-	        	 File outpath =  new File(destDirectory,entry.getName());
-		         if(entry.isDirectory()){
-		        	 outpath.mkdirs();
-	        	 }else{
-		        	 if(!outpath.getParentFile().exists())
-		            	 outpath.getParentFile().mkdirs();
-		             FileOutputStream output = null;
-		             try{
-		            	 output = new FileOutputStream(outpath);
-		                 int len = 0;
-		                 while ((len = stream.read(buffer)) > 0){
-		                	 output.write(buffer, 0, len);
-		                 }
-		             }finally {
-		                 // we must always close the output file
-		                 if(output !=null) 
-		                	 output.close();
-		            }
-	        	}
-	        }
-	     }finally{
-	         // we must always close the zip file.
-	         stream.close();
-	     }
-	 }
 	
 	
 	public NobleCoderTerminology getTerminology(){

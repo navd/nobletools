@@ -293,6 +293,9 @@ public class ConceptImporter {
 			//	continue;
 			
 			IClass cls = (IClass)it.next();
+			if(cls == null)
+				continue;
+			
 			String code = getCode(cls,truncateURI);
 			if(storage.getConceptMap().containsKey(code))
 				continue;
@@ -362,7 +365,7 @@ public class ConceptImporter {
 		// strip suffix
 		if(name.endsWith(".txt"))
 			name = name.substring(0,name.length()-".txt".length());
-		name = name;
+		
 		term.load(name);
 		NobleCoderTerminology.Storage storage = term.getStorage();
 		

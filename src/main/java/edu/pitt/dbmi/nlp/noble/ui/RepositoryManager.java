@@ -54,10 +54,10 @@ import edu.pitt.dbmi.nlp.noble.terminology.Describable;
 import edu.pitt.dbmi.nlp.noble.terminology.Terminology;
 import edu.pitt.dbmi.nlp.noble.terminology.TerminologyException;
 import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
-import edu.pitt.dbmi.nlp.noble.tools.FileTools;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import edu.pitt.dbmi.nlp.noble.ui.widgets.ResourceCellRenderer;
 import edu.pitt.dbmi.nlp.noble.util.ConceptImporter;
+import edu.pitt.dbmi.nlp.noble.util.FileTools;
 
 public class RepositoryManager implements ActionListener, ListSelectionListener, PropertyChangeListener{
 	

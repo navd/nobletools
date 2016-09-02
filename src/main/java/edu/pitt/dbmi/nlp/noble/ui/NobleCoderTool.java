@@ -73,9 +73,9 @@ import edu.pitt.dbmi.nlp.noble.terminology.Source;
 import edu.pitt.dbmi.nlp.noble.terminology.Terminology;
 import edu.pitt.dbmi.nlp.noble.terminology.TerminologyException;
 import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
-import edu.pitt.dbmi.nlp.noble.tools.FileTools;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import edu.pitt.dbmi.nlp.noble.util.CSVExporter;
+import edu.pitt.dbmi.nlp.noble.util.FileTools;
 import edu.pitt.dbmi.nlp.noble.util.HTMLExporter;
 
 

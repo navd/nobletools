@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import edu.pitt.dbmi.nlp.noble.util.FileTools;
 import edu.pitt.dbmi.nlp.noble.util.Sender;
 
 

@@ -19,6 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -389,6 +390,8 @@ public class ConceptImporter {
 		storage.getInfoMap().put("location",file.getAbsolutePath());
 		//storage.getInfoMap().put("stem.words",""+stemWords);
 		
+		
+		// old format
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 		Concept c = new Concept("_");
 		List<String> synonyms = new ArrayList<String>();
@@ -413,6 +416,52 @@ public class ConceptImporter {
 			}
 		}
 		reader.close();
+		
+		// create two root classes
+		//TODO: implement well for tab delimeted synonym bar seperated file
+		/*
+		IClass term = ontology.createClass("Terminology");
+		term.addLabel("Terminology");
+		IClass attributes = term.createSubClass("Attributes");
+		attributes.addLabel("Attributes");
+		Stack<IClass> parentStack = new Stack<IClass>();
+		parentStack.push(term);
+		String lastLine = null;
+		IClass lastClass = null;
+		BufferedReader r = new BufferedReader(new FileReader(file));
+		for(String line = r.readLine(); line != null; line = r.readLine()){
+			if(line.trim().startsWith("#") || line.trim().length() == 0){
+				//includ children
+				processOptions(line);
+				continue;
+			}
+			
+			// figure out hierarchy
+			if(lastLine != null){
+				int l=  StringUtils.getTabOffset(lastLine);
+				int n = StringUtils.getTabOffset(line);
+				// this means that this entry is a child of new entry
+				if(n > l){
+					parentStack.push(lastClass);
+				}else if(n < l){
+					// else we move back to previous parent
+					// depending on the depth
+					for(int i=0;!parentStack.isEmpty() && i< (l-n);i++)
+						parentStack.pop();
+				}
+			}
+			
+			IClass parent = parentStack.peek();
+			IClass cls = createClass(line,parent); 
+			
+			// save for next iteration
+			lastClass = cls;
+			lastLine = line;
+		}
+		r.close();
+		
+		
+		*/
 		
 		// handle last concept
 		if(c != null && synonyms != null && synonyms.size() > 0){

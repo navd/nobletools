@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.nlp.noble.tools;
+package edu.pitt.dbmi.nlp.noble.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
 
 public class FileTools {
 

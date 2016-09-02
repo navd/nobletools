@@ -205,4 +205,20 @@ public class StringUtils {
 	}
 	
 	
+	/**
+	 * get number of tabs that are prefixed in a string
+	 * @param s
+	 * @return
+	 */
+	public static int getTabOffset(String str){
+		int count = 0;
+		for(int i = 0;i<str.length();i++){
+			if(str.charAt(i) == '\t')
+				count ++;
+			else
+				break;
+		}
+		return count;
+	}
+	
 }

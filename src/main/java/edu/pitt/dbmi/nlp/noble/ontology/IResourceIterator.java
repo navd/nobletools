@@ -40,4 +40,11 @@ public interface IResourceIterator extends Iterator {
 	 */
 	public void setLimit(int limit);
 	
+	
+	/**
+	 * if possible to know the total size
+	 * @return
+	 */
+	public int getTotal();
+	
 }

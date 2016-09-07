@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.nlp.noble.ui;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -29,10 +30,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -47,6 +50,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import edu.pitt.dbmi.nlp.noble.ontology.DefaultRepository;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.OntologyUtils;
 import edu.pitt.dbmi.nlp.noble.ontology.bioportal.BOntology;
@@ -73,11 +77,11 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 	{"UMLS/Metathesaurus RRF Directory","OWL Ontology","OBO Taxonomy","BioPortal Ontology","Terminology Text File"};
 	private final String [] FORMAT_ARGS = new String [] {"-rrf","-owl","-obo","-bioportal","-txt"};
 	private JFrame frame;
-	private JComboBox inputFormats;
+	private JComboBox inputFormats,metathesaurusList;
 	private JTextField inputLocation,outputLocation,semanticTypeList,sourceList,languageList,memSize;
 	private JTextArea console;
-	private JCheckBox useStemmer,stripDigits,truncateURI,inMemory,suppressObsoleteTerms;
-	private JPanel rrfOptions,owlOptions,buttonPanel,commonOptions;
+	private JCheckBox useStemmer,stripDigits,compact,suppressObsoleteTerms,useMetaInfo; //inMemory, truncateURI
+	private JPanel buttonPanel,commonOptions;
 	private JDialog bioportalDialog;
 	private OntologyImporter importer;
 	private JButton run,options;
@@ -319,11 +323,21 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 			    if(createAncestors != null && createAncestors.isSelected())
 			    	args.add("-createAncestry");
 			    
-			    if(truncateURI != null && truncateURI.isSelected())
-			    	args.add("-abbreviateURIcodes");
+			    //if(truncateURI != null && truncateURI.isSelected())
+			    //	args.add("-abbreviateURIcodes");
 			    
-			    if(inMemory != null && inMemory.isSelected())
-			    	args.add("-inMem");
+			    /*if(inMemory != null && inMemory.isSelected())
+			    	args.add("-inMem");*/
+			   
+			    if(useMetaInfo != null && useMetaInfo.isSelected()){
+			    	args.add("-useMeta");
+			    	args.add(""+metathesaurusList.getSelectedItem());
+			    }
+			    	
+			    
+			    if(compact != null && compact.isSelected())
+			    	args.add("-compact");
+			    
 			    
 			    if(maxWordsInTermCheck != null && maxWordsInTermCheck.isSelected())
 			    	args.add("-maxWordsInTerm "+maxWordsInTerm.getText());
@@ -353,7 +367,6 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 		try {
 				load(args.toArray(new String [0]));
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		 
@@ -402,13 +415,17 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 			commonOptions.setBorder(new TitledBorder("Common Options"));
 			
 			useStemmer = new JCheckBox("Stem words with a Porter Stemmer when saving term information",true);
+			useStemmer.setToolTipText("Stemming words will help with handling word inflections and will increase term recall at the expense of precision.");
 			stripDigits = new JCheckBox("Strip digits when saving term information",false);
+			stripDigits.setToolTipText("Don't store digits that are part of a term. Don't use this option, if there could be an important numeric information that is part of a term.");
 			createAncestors = new JCheckBox("Create ancestry cache for terminology",false);
+			createAncestors.setToolTipText("Pre-built ancestry cache for a terminology to spead up ancestry resolution access later");
 			maxWordsInTerm = new JTextField("10",3);
 			maxWordsInTerm.setHorizontalAlignment(JTextField.CENTER);
 			maxWordsInTerm.setToolTipText("Number of irrelevant words that can occur betwen adjacent words in a term");
 			
 			maxWordsInTermCheck = new JCheckBox("Limit the size of a term to that number of words",true);
+			maxWordsInTermCheck.setToolTipText("Exclude terms that are so large and so specific that they are no longer useful.");
 			maxWordsInTerm.setEditable(maxWordsInTermCheck.isSelected());
 			maxWordsInTermCheck.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -422,7 +439,10 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 			p.add(maxWordsInTermCheck);
 			p.add(maxWordsInTerm);
 			
-			inMemory = new JCheckBox("Create in-memory terminology instead of file cache",false);
+			//inMemory = new JCheckBox("Create in-memory terminology instead of file cache",false);
+			compact = new JCheckBox("Compact terminology after import to improve performance.",true);
+			compact.setToolTipText("<html>Compacting terminology improves lookup performance, but adds extra time during loading.<br>"
+					+ "Compacting a terminology is not recommended if its content is not static and will change over time.");
 			
 			suppressObsoleteTerms = new JCheckBox("Suprress obsolete terms",true);
 			suppressObsoleteTerms.setToolTipText("Do not include terms that are marked 'Obsolete' in a dictionary");
@@ -431,7 +451,8 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 			commonOptions.add(stripDigits);
 			commonOptions.add(createAncestors);
 			commonOptions.add(p);
-			commonOptions.add(inMemory);
+			commonOptions.add(compact);
+			//commonOptions.add(inMemory);
 			commonOptions.add(suppressObsoleteTerms);
 			
 		}
@@ -442,14 +463,78 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 		//if(owlOptions == null){
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
-		truncateURI = new JCheckBox("Abbreviate class URIs as a concept code");
+		/*truncateURI = new JCheckBox("Abbreviate class URIs as a concept code");
 		truncateURI.setToolTipText("<html>If <b>code</b> property is not defined class URI is typically used as concept code.<br>"
 				+ "Ex: http://www.ontologies.com/ontologies/MyTestOntology.owl#Class_Name -> MTO:Class_Name, if abbreviation is used.");
-		panel.add(truncateURI);
+		panel.add(truncateURI);*/
 		panel.add(getCommonOptions());
-		owlOptions = panel;
-		//}
-		return owlOptions;
+		return panel;
+	}
+	
+	private JPanel getBioportalDialog(){
+		//if(owlOptions == null){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+		JTextArea description = new JTextArea(4,20);
+		description.setBorder(new EmptyBorder(10, 10, 10, 10));
+		description.setText(
+				"Import an ontology from BioPortal repository that is available in OWL format.");
+		description.setEditable(false);
+		description.setWrapStyleWord(true);
+		description.setLineWrap(true);
+		description.setBackground(new Color(255,255,200));
+		description.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+		panel.add(description);
+		panel.add(getCommonOptions());
+		return panel;
+	}
+	
+	private JPanel getTxtDialog(){
+		//if(owlOptions == null){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+		
+		JTextArea description = new JTextArea(6,20);
+		description.setBorder(new EmptyBorder(10, 10, 10, 10));
+		description.setText(
+				"Import a text file where each line is a semi-column delimited list of terms for each concept. "+
+				"Each line can be indented with tabs to indicate a hierarchy of concepts. "+
+				"If a term looks like a UMLS CUI or a semantic type TUI, then this information is added appropriately. "+
+				"Optionally additional concept meta information can be pulled from another terminlogy s.a. UMLS if it is a direct match.");
+		description.setEditable(false);
+		description.setWrapStyleWord(true);
+		description.setLineWrap(true);
+		description.setBackground(new Color(255,255,200));
+		description.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+		
+		useMetaInfo  = new JCheckBox("Pull additional concept information from another terminology",false);
+		useMetaInfo.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+		
+		DefaultRepository repo = new DefaultRepository();
+		Terminology [] terms = repo.getTerminologies();
+		metathesaurusList = new JComboBox<Terminology>(terms);
+		metathesaurusList.setEnabled(false);
+		metathesaurusList.setMaximumSize(useMetaInfo.getPreferredSize());
+		metathesaurusList.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+		for(Terminology t: terms){
+			if(t.getName().contains("UMLS") || t.getName().contains("Metathesaurus")){
+				metathesaurusList.setSelectedItem(t);
+				break;
+			}
+		}
+		
+		useMetaInfo.setOpaque(false);
+		useMetaInfo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				metathesaurusList.setEnabled(useMetaInfo.isSelected());
+			}
+		});
+		panel.add(description);
+		panel.add(useMetaInfo);
+		panel.add(metathesaurusList);
+		panel.add(Box.createRigidArea(new Dimension(20,20)));
+		panel.add(getCommonOptions());
+		return panel;
 	}
 	
 	
@@ -497,10 +582,7 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 		c.gridwidth=3;
 		c.gridheight=1;
 		panel.add(getCommonOptions(),c);
-			
-			rrfOptions = panel;
-		//}
-		return rrfOptions;
+		return panel;
 	}
 	
 	
@@ -510,6 +592,8 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 		switch(inputFormats.getSelectedIndex()){
 		case 0: JOptionPane.showMessageDialog(frame,getRRFDialog(),"RRF Options",JOptionPane.PLAIN_MESSAGE);;break;
 		case 1: JOptionPane.showMessageDialog(frame,getOWLDialog(),"OWL Options",JOptionPane.PLAIN_MESSAGE); break;
+		case 3: JOptionPane.showMessageDialog(frame,getBioportalDialog(),"TXT Options",JOptionPane.PLAIN_MESSAGE); break;
+		case 4: JOptionPane.showMessageDialog(frame,getTxtDialog(),"TXT Options",JOptionPane.PLAIN_MESSAGE); break;
 		default:  JOptionPane.showMessageDialog(frame,getCommonOptions(),"Common Options",JOptionPane.PLAIN_MESSAGE); break;
 		}
 	}
@@ -537,8 +621,8 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 		if(e.getStateChange() == ItemEvent.SELECTED){
 			//options.setEnabled(false);
 			switch(inputFormats.getSelectedIndex()){
-			case 0: inputLabel.setText("Input RRF Directory");options.setEnabled(true);break;
-			case 1: inputLabel.setText("Input OWL File");options.setEnabled(true); break;
+			case 0: inputLabel.setText("Input RRF Directory");break;
+			case 1: inputLabel.setText("Input OWL File"); break;
 			case 2: inputLabel.setText("Input OBO File");break;
 			case 3: inputLabel.setText("Input BioPortal URL");break;
 			case 4: inputLabel.setText("Input Text File");break;
@@ -549,7 +633,27 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 	}
 	
 	public void propertyChange(PropertyChangeEvent e) {
-		log(e.getPropertyName()+": "+e.getNewValue());
+		final String prop = e.getPropertyName();
+		final String val  = ""+ e.getNewValue();
+		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				if(ConceptImporter.LOADING_TOTAL.equals(prop)){
+					progress.setIndeterminate(false);
+					progress.setMaximum(Integer.parseInt(val));
+				}else if(ConceptImporter.LOADING_PROGRESS.equals(prop)){
+					progress.setIndeterminate(false);
+					progress.setValue(Integer.parseInt(val));
+				}else if(ConceptImporter.LOADING_MESSAGE.equals(prop)){
+					progress.setIndeterminate(true);
+					progress.setString(val);
+					log(val);
+				}else{
+					log(val);
+				}
+			}
+		});
+		
 	}
 	
 	/**
@@ -582,25 +686,39 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 		String hsr = getOption(params,"-hierarchySources");
 		String se = getOption(params,"-semanticTypes");
 		String mwit = getOption(params,"-maxWordsInTerm");
+		String meta = getOption(params,"-useMeta");
 		boolean stemWords = params.contains("-stemWords");
 		boolean stripDigits = params.contains("-stripDigits");
 		boolean createAncestry = params.contains("-createAncestry");
-		boolean abbreviateURI = params.contains("-abbreviateURIcodes");
-		boolean inmem = params.contains("-inMem");
+		//boolean abbreviateURI = params.contains("-abbreviateURIcodes");
+		boolean compact = params.contains("-compact");
+		//boolean inmem = params.contains("-inMem");
 		boolean hmwit = params.contains("-maxWordsInTerm");
 		boolean suppressObsoleteTerms = params.contains("-suppressObsoleteTerms");
 		
 		// remove previous listener
 		ConceptImporter.getInstance().removePropertyChangeListener(this);
-		
+		ConceptImporter.getInstance().addPropertyChangeListener(this);
 		
 		// start index finder terminology
 		NobleCoderTerminology terminology = new NobleCoderTerminology();
-		terminology.addPropertyChangeListener(this);
 		terminology.setStemWords(stemWords);
 		terminology.setIgnoreDigits(stripDigits);
 		if(hmwit)
 			terminology.setMaximumWordsInTerm(Integer.parseInt(mwit));
+		
+		// setup compact option
+		if(compact)
+			ConceptImporter.getInstance().setCompact(compact);
+		ConceptImporter.getInstance().setInMemory(false);
+		
+	
+		// normalize meta info
+		Terminology metaTerm = null;
+		if(meta != null){
+			metaTerm = new NobleCoderTerminology(meta);
+		}
+		
 		
 		// setup persistance directory
 		String name = null;
@@ -640,28 +758,24 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 			pmap.put("semanticTypes",sem);
 			pmap.put("hierarchySources",hsrc);
 			pmap.put("suppressObsoleteTerms",Arrays.asList(""+suppressObsoleteTerms));
-			terminology.loadRRF(f,pmap,inmem);
+			
+			// load the terminology
+			ConceptImporter.getInstance().loadRRF(terminology,f,pmap);
 			name = (name == null)?f.getName():name;
 		}else if(owl != null){
 			log("Loading OWL terminology from "+owl+"...");
 			IOntology ont = OOntology.loadOntology(owl);
 			if(ont != null){
-				terminology.loadOntology(ont,name,false,abbreviateURI);
+				ConceptImporter.getInstance().loadOntology(terminology,ont,name);
 			}
 			name = (name == null)?ont.getName():name;
 		}else if(obo != null){
 			log("Loading OBO terminology from "+obo+"...");
-			if(name == null){
-				name = (new File(obo)).getName();
-				if(name.endsWith(".obo"))
-					name = name.substring(0,name.length()-4);
-			}
-			terminology.load(name);
-			ConceptImporter.getInstance().addPropertyChangeListener(this);
+			List<File> files = new ArrayList<File>();
 			for(String f: obo.split(","))
-				ConceptImporter.getInstance().loadOBO(terminology,new File(f.trim()));
-			ConceptImporter.getInstance().removePropertyChangeListener(this);
-			terminology.save();
+				files.add(new File(f.trim()));
+			ConceptImporter.getInstance().loadOBO(terminology,files,name);	
+			name = (name == null)?files.get(0).getName():name;
 		}else if(bioportal != null){
 			log("Loading BioPortal terminology from "+bioportal+"...");
 			BioPortalRepository r = new BioPortalRepository();
@@ -679,13 +793,13 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 					}
 				}
 				if(ont != null)
-					terminology.loadOntology(ont,name);
+					ConceptImporter.getInstance().loadOntology(terminology,ont,name);
 			}
 			name = (name == null)?ont.getName():name;
 		}else if(txt != null){
 			log("Loading Text terminology from "+txt+"...");
 			File f = new File(txt);
-			terminology.loadText(f,name);
+			ConceptImporter.getInstance().loadText(terminology,f,name,metaTerm);
 			name = (name == null)?f.getName():name;
 		}
 		
@@ -708,6 +822,7 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 		terminology = null;
 		System.gc();
 		pcs.firePropertyChange("LOADING",null,"done");
+		ConceptImporter.getInstance().removePropertyChangeListener(this);
 	}
 	
 	

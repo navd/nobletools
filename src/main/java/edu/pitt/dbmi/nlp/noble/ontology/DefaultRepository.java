@@ -11,10 +11,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OReasoner;
@@ -179,7 +182,12 @@ public class DefaultRepository implements IRepository{
 			}
 			
 		}
-		return terminologies.values().toArray(new Terminology [0]);
+		Set<Terminology> terms = new TreeSet<Terminology>(new Comparator<Terminology>(){
+			public int compare(Terminology o1, Terminology o2) {
+				return o1.getName().compareTo(o2.getName());
+			}});
+		terms.addAll(terminologies.values());
+		return terms.toArray(new Terminology [0]);
 	}
 
 	public Terminology getTerminology(String path) {

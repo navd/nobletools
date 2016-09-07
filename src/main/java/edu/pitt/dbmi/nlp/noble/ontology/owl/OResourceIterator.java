@@ -18,7 +18,7 @@ public class OResourceIterator extends DefaultResourceIterator{
 	
 	
 	public OResourceIterator(Collection list ,OOntology ont){
-		super(list.iterator());
+		super(list);
 		this.ont =  ont;
 	}
 	

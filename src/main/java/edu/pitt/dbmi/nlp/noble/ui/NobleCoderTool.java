@@ -749,7 +749,7 @@ public class NobleCoderTool implements ActionListener{
 				skipAbbrreviationLogic = false;
 				terminology.setIgnoreAcronyms(true);
 			}
-			terminology.clearCache();
+			//terminology.clearCache();
 		}
 	}
 	
@@ -1374,7 +1374,7 @@ public class NobleCoderTool implements ActionListener{
 		p.setProperty("terminology.name",terminology.getName());
 		
 		// clear flash
-		terminology.clearCache();
+		//terminology.clearCache();
 		
 		
 		int x = args.indexOf("-slidingWindow");

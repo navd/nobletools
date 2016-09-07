@@ -197,14 +197,14 @@ public class TemplateFactory {
 		
 		// create in-memory terminology from this ontology
 		NobleCoderTerminology term = new NobleCoderTerminology();
-		term.loadOntology(ont,null,true,true);
+		term.loadOntology(ont,null,true);
 		term.setScoreConcepts(false);
 		term.setSelectBestCandidate(false);
-		term.setCachingEnabled(false);
+		//term.setCachingEnabled(false);
 		
 		NobleCoderTerminology aterm = new NobleCoderTerminology();
-		aterm.loadOntology(OOntology.loadOntology(""+ANATOMY_ONTOLOGY_URI),null,true,true);
-		aterm.setCachingEnabled(false);
+		aterm.loadOntology(OOntology.loadOntology(""+ANATOMY_ONTOLOGY_URI),null,true);
+		//aterm.setCachingEnabled(false);
 		
 		// add a terminology to it
 		CompositTerminology terminology = new CompositTerminology();

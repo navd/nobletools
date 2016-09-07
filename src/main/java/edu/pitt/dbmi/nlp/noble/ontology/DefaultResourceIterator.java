@@ -8,10 +8,14 @@ import java.util.*;
  */
 public class DefaultResourceIterator implements IResourceIterator {
 	protected Iterator it;
-	protected int offset,limit, count;
+	protected int offset,limit, count, total = -1;
 	
 	public DefaultResourceIterator(Iterator it){
 		this.it = it;
+	}
+	public DefaultResourceIterator(Collection it){
+		this.it = it.iterator();
+		total = it.size();
 	}
 	
 	public int getCount() {
@@ -66,4 +70,7 @@ public class DefaultResourceIterator implements IResourceIterator {
 		it.remove();
 	}
 
+	public int getTotal(){
+		return total;
+	}
 }

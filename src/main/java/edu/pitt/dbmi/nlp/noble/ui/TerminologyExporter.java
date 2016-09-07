@@ -62,6 +62,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IProperty;
 import edu.pitt.dbmi.nlp.noble.ontology.IRepository;
+import edu.pitt.dbmi.nlp.noble.ontology.OntologyUtils;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.terminology.Definition;
@@ -90,7 +91,7 @@ public class TerminologyExporter implements ActionListener {
 	public final String ALT_CODE = "AlternateCode";
 	public final String PREF_TERM = "PreferredTerm";
 	//public static final String TERMINOLOGY_CORE = "http://blulab.chpc.utah.edu/ontologies/Terminology.owl";
-	public static final String TERMINOLOGY_CORE = "http://blulab.chpc.utah.edu/ontologies/TermMapping.owl";
+	public static final String TERMINOLOGY_CORE = OntologyUtils.TERMINOLOGY_CORE;
 	
 	// GUI components
 	private JPanel main;

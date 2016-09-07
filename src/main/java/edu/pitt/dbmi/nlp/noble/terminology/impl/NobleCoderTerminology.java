@@ -52,6 +52,7 @@ import edu.pitt.dbmi.nlp.noble.terminology.Relation;
 import edu.pitt.dbmi.nlp.noble.terminology.SemanticType;
 import edu.pitt.dbmi.nlp.noble.terminology.Source;
 import edu.pitt.dbmi.nlp.noble.terminology.Term;
+import edu.pitt.dbmi.nlp.noble.terminology.Terminology;
 import edu.pitt.dbmi.nlp.noble.terminology.TerminologyException;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools.StringStats;
@@ -73,10 +74,10 @@ import edu.pitt.dbmi.nlp.noble.util.XMLUtils;
 
 public class NobleCoderTerminology extends AbstractTerminology implements Processor<Sentence>{
 	// names of property events to monitor progress
-	public static final int CACHE_LIMIT = 10000;
-	public static final String LOADING_MESSAGE  = "INDEX_FINDER_MESSAGE";
-	public static final String LOADING_PROGRESS = "INDEX_FINDER_PROGRESS";
-	public static final String LOADING_TOTAL    = "INDEX_FINDER_TOTAL";
+	//public static final int CACHE_LIMIT = 10000;
+	public static final String LOADING_MESSAGE  = ConceptImporter.LOADING_MESSAGE;
+	public static final String LOADING_PROGRESS = ConceptImporter.LOADING_PROGRESS;
+	public static final String LOADING_TOTAL    = ConceptImporter.LOADING_TOTAL;
 	// names of search methods
 	public static final String BEST_MATCH = "best-match";
 	public static final String ALL_MATCH = "all-match";
@@ -86,7 +87,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	public static final String CUSTOM_MATCH = "custom-match";
 	
 	public static final String TERM_SUFFIX = ".term";
-	public static final String MEM_FILE = "terminology.mem";
+	//public static final String MEM_FILE = "terminology.mem";
 	public static final String TERM_FILE = "terms";
 	public static final String CONCEPT_FILE = "concepts";
 	public static final String INFO_FILE = "info.txt";
@@ -96,7 +97,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	private File location;
 	private String name;
 	private Storage storage;
-	private CacheMap<String,Concept []> cache;
+	//private CacheMap<String,Concept []> cache;
 	
 	// print rough size and time
 	//private final boolean DEBUG = false;
@@ -139,7 +140,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	private Set<SemanticType> filteredSemanticTypes;
 	private Set<String> filteredLanguages;
 	private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-	private boolean cachingEnabled = false,truncateURI = false;
+	//private boolean cachingEnabled = false,truncateURI = false;
 	private long processTime;
 	
 	/**
@@ -350,7 +351,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 		return compacted;
 	}
 	
-	
+	/*
 	public boolean isCachingEnabled() {
 		return cachingEnabled;
 	}
@@ -358,6 +359,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	public void setCachingEnabled(boolean b) {
 		this.cachingEnabled = b;
 	}
+	*/
 
 	// init default persistence directory
 	static{
@@ -416,7 +418,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	 */
 	public NobleCoderTerminology(IOntology ont) throws IOException, TerminologyException, IOntologyException{
 		init();
-		loadOntology(ont,null,true,true);
+		loadOntology(ont,null,true);
 	}
 	
 	/**
@@ -424,16 +426,24 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	 */
 	public void init(){
 		storage = new Storage();
-		cache = new CacheMap<String, Concept []>(CacheMap.FREQUENCY);
-		cache.setSizeLimit(CACHE_LIMIT);		
+		/*cache = new CacheMap<String, Concept []>(CacheMap.FREQUENCY);
+		cache.setSizeLimit(CACHE_LIMIT);*/		
+	}
+	
+	/**
+	 * initialize a named terminology that has already been 
+	 * persisted on disk
+	 */
+	public NobleCoderTerminology(String name) throws IOException{
+		load(name,true);
 	}
 	
 	/**
 	 * initialize a named terminology that either has already been 
 	 * persisted on disk, or will be persisted on disk
 	 */
-	public NobleCoderTerminology(String name) throws IOException{
-		load(name,true);
+	public NobleCoderTerminology(String name, boolean readonly) throws IOException{
+		load(name,readonly);
 	}
 	
 	/**
@@ -517,7 +527,11 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 		if(!location.exists())
 			location.mkdirs();
 		
+		storage = new Storage();
+		storage.load(location,readonly);
+		
 		// split into two seperate 
+		/*
 		File memFile = new File(location,MEM_FILE);
 		if(memFile.exists()){
 			//TODO: not very efficient
@@ -530,10 +544,9 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 			storage = new Storage();
 			storage.load(location,readonly);
 		}
-	
 		cache = new CacheMap<String, Concept []>(CacheMap.FREQUENCY);
 		cache.setSizeLimit(CACHE_LIMIT);
-		
+		*/
 		
 		// load default values
 		if(storage.getInfoMap().containsKey("stem.words"))
@@ -609,7 +622,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 		p.setProperty("score.concepts",""+scoreConcepts);
 		p.setProperty("window.size",""+getWindowSize());
 		p.setProperty("maximum.word.gap",""+getMaximumWordGap());
-		p.setProperty("enable.search.cache",""+cachingEnabled);
+		//p.setProperty("enable.search.cache",""+cachingEnabled);
 		p.setProperty("ignore.used.words",""+ignoreUsedWords);
 		p.setProperty("subsumption.mode",""+subsumptionMode);
 		p.setProperty("overlap.mode",""+overlapMode);
@@ -690,8 +703,8 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 			orderedMode = Boolean.parseBoolean(p.getProperty("ordered.mode"));
 		if(p.containsKey("partial.mode"))
 			partialMode = Boolean.parseBoolean(p.getProperty("partial.mode"));
-		if(p.containsKey("enable.search.cache"))
-			cachingEnabled = Boolean.parseBoolean(p.getProperty("enable.search.cache"));
+		//if(p.containsKey("enable.search.cache"))
+		//	cachingEnabled = Boolean.parseBoolean(p.getProperty("enable.search.cache"));
 		if(p.containsKey("partial.match.theshold"))
 			partialMatchThreshold = Double.parseDouble(p.getProperty("partial.match.theshold"));
 		if(p.containsKey("max.words.in.term"))
@@ -864,7 +877,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	 * @throws TerminologyException 
 	 */
 	public void loadOntology(IOntology ontology, String name) throws IOException, TerminologyException, IOntologyException {
-		loadOntology(ontology,name,false,false);
+		loadOntology(ontology,name,false);
 	}
 	
 	/**
@@ -873,9 +886,9 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	 * @throws IOException
 	 * @throws TerminologyException 
 	 */
-	public void loadOntology(IOntology ontology, String name, boolean inmemory,boolean truncateURI) throws IOException, TerminologyException, IOntologyException {
-		this.truncateURI = truncateURI;
-		ConceptImporter.getInstance().loadOntology(this, ontology, name, inmemory, truncateURI);
+	public void loadOntology(IOntology ontology, String name, boolean inmemory) throws IOException, TerminologyException, IOntologyException {
+		ConceptImporter.getInstance().setInMemory(inmemory);
+		ConceptImporter.getInstance().loadOntology(this, ontology, name);
 	}
 	
 	/**
@@ -918,7 +931,8 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	 * hierarchySources - only include hierarhy information from a list of sources
 	 */
 	public void loadRRF(File dir, Map<String,List<String>> params,boolean inmem) throws FileNotFoundException, IOException, TerminologyException {
-		ConceptImporter.getInstance().loadRRF(this, dir, params,inmem);
+		ConceptImporter.getInstance().setInMemory(inmem);
+		ConceptImporter.getInstance().loadRRF(this, dir, params);
 	}
 	
 	/**
@@ -930,6 +944,14 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 		ConceptImporter.getInstance().loadText(this,file, name);
 	}
 	
+	/**
+	 * load terms file
+	 * @param file
+	 * @throws Exception
+	 */
+	public void loadText(File file,String name,Terminology term) throws Exception {
+		ConceptImporter.getInstance().loadText(this,file, name,term);
+	}
 	
 	/**
 	 * returns true if this terminology doesn't contain any terms
@@ -955,11 +977,11 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	
 	/**
 	 * clear cache
-	 */
+	 *
 	public void clearCache(){
 		cache.clear();
 	}
-	
+	*/
 	/**
 	 * save all information to disc
 	 */
@@ -1059,7 +1081,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 				
 				// insert words
 				for(String word: TextTools.getWords(term)){
-					setWordTerms(word,terms);	
+					ConceptImporter.getInstance().saveWordTerms(getStorage(),word,terms);	
 				}
 			}
 			
@@ -1087,20 +1109,7 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 		return false;
 	}
 	
-	/**
-	 * only return terms where given word occures
-	 * @param workd
-	 * @param terms
-	 * @return
-	 */
-	private Set<String> filterTerms(String word, Set<String> terms){
-		Set<String> result = new HashSet<String>();
-		for(String t: terms){
-			if(t.contains(word))
-				result.add(t);
-		}
-		return result;
-	}
+	
 	
 	public boolean removeConcept(Concept c) throws TerminologyException {
 		// find concept terms
@@ -1441,50 +1450,6 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 		return storage.getWordMap().get(word);
 	}
 	
-	
-	/**
-	 * add entry to word table
-	 * @param word
-	 * @param terms
-	 */
-	public void setWordTerms(String word,Set<String> terms){
-		// filter terms to only include those that contain a given word
-		Set<String> termList = filterTerms(word,terms);
-		
-		// if in temp word folder mode, save in temp directory instead of map
-		if(storage.useTempWordFolder && location != null && location.exists()){
-			try {
-				ConceptImporter.saveTemporaryTermFile(location, word, termList);
-			} catch (IOException e) {
-				pcs.firePropertyChange(LOADING_MESSAGE,null,"Warning: failed to create file \""+word+"\", reason: "+e.getMessage());
-			}
-		// else do the normal save to MAP	
-		}else{
-			if(storage.getWordMap().containsKey(word)){
-				termList.addAll(getWordTerms(word));
-			}
-			try{
-				storage.getWordMap().put(word,termList);
-				storage.commit(storage.getWordMap());
-			}catch(IllegalArgumentException e ){
-				storage.getWordMap().put(word,new HashSet<String>(Collections.singleton(word)));
-				pcs.firePropertyChange(LOADING_MESSAGE,null,"Warning: failed to insert word \""+word+"\", reason: "+e.getMessage());
-				
-			}
-			// if word already existed, subtract previous value from the total
-			if(storage.getWordStatMap().containsKey(word))
-				storage.totalTermsPerWord -= storage.getWordStatMap().get(word).termCount;
-			
-			WordStat ws = new WordStat();
-			ws.termCount = termList.size();
-			ws.isTerm = termList.contains(word);
-			storage.getWordStatMap().put(word,ws);
-			storage.totalTermsPerWord += termList.size();
-			if(termList.size() > storage.maxTermsPerWord)
-				storage.maxTermsPerWord = termList.size();
-			
-		}
-	}
 	
 	/**
 	 * get all used words from this term
@@ -1888,88 +1853,32 @@ public class NobleCoderTerminology extends AbstractTerminology implements Proces
 	 * get related concepts map
 	 */
 	public Map getRelatedConcepts(Concept c) throws TerminologyException {
-		// if we have a class, build the map from it, forget concept
-		IClass cls = null; // c.getConceptClass();
-		if(cls != null){
+		Map<String,Set<String>> relationMap = c.getRelationMap();
+		if(relationMap != null){
 			Map<Relation,Concept []> map = new HashMap<Relation,Concept []>();
-			map.put(Relation.BROADER,getRelatedConcepts(c,Relation.BROADER));
-			map.put(Relation.NARROWER,getRelatedConcepts(c,Relation.NARROWER));
-			return map;
-		// else see if there is a relation map attached to concept
-		}else{
-			Map<String,Set<String>> relationMap = c.getRelationMap();
-			if(relationMap != null){
-				Map<Relation,Concept []> map = new HashMap<Relation,Concept []>();
-				for(String key: relationMap.keySet()){
-					List<Concept> list = new ArrayList<Concept>();
-					for(String cui: relationMap.get(key)){
-						Concept con = lookupConcept(cui);
-						if(con != null)
-							list.add(con);
-					}
-					map.put(Relation.getRelation(key),list.toArray(new Concept [0]));
+			for(String key: relationMap.keySet()){
+				List<Concept> list = new ArrayList<Concept>();
+				for(String cui: relationMap.get(key)){
+					Concept con = lookupConcept(cui);
+					if(con != null)
+						list.add(con);
 				}
-				return map;
+				map.put(Relation.getRelation(key),list.toArray(new Concept [0]));
 			}
+			return map;
 		}
+		
 		// else return an empty map
 		return Collections.EMPTY_MAP;
 	}
 	
 	public Concept[] getRelatedConcepts(Concept c, Relation r) throws TerminologyException {
 		// if we have a class already, use the ontology
-		IClass cls = null; //c.getConceptClass();
-		if(cls != null){
-			if(r == Relation.BROADER){
-				return convertConcepts(cls.getDirectSuperClasses());
-			}else if(r == Relation.NARROWER){
-				return convertConcepts(cls.getDirectSubClasses());
-			}else if(r == Relation.SIMILAR){
-				List<IClass> clses = new ArrayList<IClass>();
-				for(IClass eq: cls.getEquivalentClasses()){
-					if(!eq.isAnonymous()){
-						clses.add(eq);
-					}
-				}
-				return convertConcepts(clses);
-			}
-		// if we don't have a class, use the concept map
-		}else if(getRelatedConcepts(c).containsKey(r)){
+		if(getRelatedConcepts(c).containsKey(r)){
 			return (Concept []) getRelatedConcepts(c).get(r);
 		}
 		// else return empty list
 		return new Concept [0];
-	}
-	
-	private Concept [] convertConcepts(IClass [] clses){
-		Concept [] concepts = new Concept[clses.length];
-		for(int i=0;i<concepts.length;i++){
-			concepts[i] = clses[i].getConcept();
-			concepts[i].setCode(getCode(clses[i]));
-		}
-		return concepts;
-	}
-	
-	private Concept [] convertConcepts(Collection<IClass> clses){
-		Concept [] concepts = new Concept[clses.size()];
-		int i=0;
-		for(IClass cls: clses){
-			concepts[i] = cls.getConcept();
-			concepts[i].setCode(getCode(cls));
-			i++;
-		}
-		return concepts;
-	}
-	
-	private String getCode(IClass cls){
-		return getCode(cls.getConcept().getCode());
-	}
-	
-	private String getCode(String uri){
-		if(truncateURI){
-			return StringUtils.getAbbreviatedURI(uri);
-		}
-		return uri;
 	}
 
 	public Concept convertConcept(Object obj) {

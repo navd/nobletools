@@ -709,7 +709,7 @@ public class ItemInstance implements Comparable {
 			term.setScoreConcepts(false);
 			term.setSelectBestCandidate(false);
 			term.setIgnoreUsedWords(true);
-			term.setCachingEnabled(false);
+			//term.setCachingEnabled(false);
 			term.addConcept(c);
 			Sentence s = mention.getSentence();
 			if(s == null)

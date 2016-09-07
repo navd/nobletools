@@ -10,8 +10,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import edu.pitt.dbmi.nlp.noble.terminology.Concept;
+import edu.pitt.dbmi.nlp.noble.terminology.Definition;
+import edu.pitt.dbmi.nlp.noble.terminology.SemanticType;
 
 
 
@@ -20,6 +25,18 @@ import java.util.regex.Pattern;
  * @author tseytlin
  */
 public class OntologyUtils {
+	public static final String DEFAULT_ONTOLOGY_BASE_URL = "http://ontologies.dbmi.pitt.edu/";
+	public static final String TERMINOLOGY_CORE = "http://blulab.chpc.utah.edu/ontologies/TermMapping.owl";
+	
+	
+	public static final String CODE = "code";
+	public static final String SYNONYM = "synonym";
+	public static final String DEFINITION = "definition";
+	public static final String SEM_TYPE = "semanticType";
+	public static final String ALT_CODE = "alternateCode";
+	public static final String PREF_TERM = "preferredTerm";
+	
+	
 	/**
 	 * get a paths to root for a given concept
 	 * @param name  - name of the class in question
@@ -192,4 +209,97 @@ public class OntologyUtils {
 		r.close();
 		return uri;
 	}
+	
+	
+	
+	/**
+	 * get or create property from an ontology
+	 * @param ont
+	 * @param name
+	 * @return
+	 */
+	public static IProperty getOrCreateProperty(IOntology ont, String name, int type){
+		IProperty prop = ont.getProperty(name);
+		if(prop == null)
+			prop = ont.createProperty(name,type);
+		return prop;
+	}
+	
+	/**
+	 * get or create property from an ontology
+	 * @param ont
+	 * @param name
+	 * @return
+	 */
+	public static IProperty getOrCreateProperty(IOntology ont, String name){
+		return getOrCreateProperty(ont, name,IProperty.ANNOTATION);
+	}
+	
+	/**
+	 * add concept info from concept object to class
+	 * @param c
+	 * @param cls
+	 */
+	public static void copyConceptToClass(Concept c, IClass cls) {
+		IOntology ont = cls.getOntology();
+		
+		IProperty code = getOrCreateProperty(ont,CODE);
+		IProperty synonym = getOrCreateProperty(ont,SYNONYM);
+		IProperty definition = getOrCreateProperty(ont,DEFINITION);
+		IProperty semType = getOrCreateProperty(ont,SEM_TYPE);
+		IProperty altCode = getOrCreateProperty(ont,ALT_CODE);
+		IProperty prefTerm = getOrCreateProperty(ont,PREF_TERM);
+		
+			
+		// add preferred term
+		cls.addPropertyValue(prefTerm,c.getName());
+		
+		
+		// add synonyms
+		for(String s: c.getSynonyms()){
+			if(!cls.hasPropetyValue(synonym, s))
+				cls.addPropertyValue(synonym, s);
+		}
+		
+		// add definitions
+		for(Definition d: c.getDefinitions()){
+			if(!cls.hasPropetyValue(definition,d.getDefinition()))
+				cls.addPropertyValue(definition,d.getDefinition());
+		}
+		
+		// get concept code 
+		cls.setPropertyValue(code,c.getCode());
+		for(Object src: c.getCodes().keySet()){
+			String cui = (String) c.getCodes().get(src)+" ["+src+"]";
+			if(!cls.hasPropetyValue(altCode,cui))
+				cls.addPropertyValue(altCode,cui);
+		}
+		
+		// get semantic types
+		for(SemanticType st: c.getSemanticTypes()){
+			if(!cls.hasPropetyValue(semType,st.getName()))
+				cls.addPropertyValue(semType,st.getName());
+		}
+		
+	}
+
+	/**
+	 * does the string looks loke UMLS (like) concept unique identifier
+	 * @param text
+	 * @return
+	 */
+	public static boolean isCUI(String text){
+		return text.matches("CL?\\d{4,7}");
+	}
+	
+	
+	/**
+	 * does the string looks loke UMLS (like) concept unique identifier
+	 * @param text
+	 * @return
+	 */
+	public static boolean isTUI(String text){
+		return text.matches("T\\d{2,3}");
+	}
+	
 }

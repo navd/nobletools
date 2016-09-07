@@ -6,12 +6,16 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,14 +32,18 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.IResourceIterator;
+import edu.pitt.dbmi.nlp.noble.ontology.OntologyUtils;
+import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.terminology.Definition;
 import edu.pitt.dbmi.nlp.noble.terminology.Relation;
 import edu.pitt.dbmi.nlp.noble.terminology.SemanticType;
 import edu.pitt.dbmi.nlp.noble.terminology.Source;
 import edu.pitt.dbmi.nlp.noble.terminology.Term;
+import edu.pitt.dbmi.nlp.noble.terminology.Terminology;
 import edu.pitt.dbmi.nlp.noble.terminology.TerminologyException;
 import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
+import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology.WordStat;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 
 import static edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology.*;
@@ -44,12 +52,16 @@ import static edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology.*;
  * @author tseytlin
  */
 public class ConceptImporter {
-	public static final String LOADING_MESSAGE  = "INDEX_FINDER_MESSAGE";
-	public static final String LOADING_PROGRESS = "INDEX_FINDER_PROGRESS";
-	public static final String LOADING_TOTAL    = "INDEX_FINDER_TOTAL";
+	public static final String LOADING_MESSAGE  = "MESSAGE";
+	public static final String LOADING_PROGRESS = "PROGRESS";
+	public static final String LOADING_TOTAL    = "TOTAL";
 	
 	private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	private static ConceptImporter instance;
+	private boolean inMemory, compact;
+	
+	
+	
 	
 	/**
 	 * get instance
@@ -68,6 +80,23 @@ public class ConceptImporter {
 		pcs.removePropertyChangeListener(l);
 	}
 	
+	
+	public boolean isInMemory() {
+		return inMemory;
+	}
+
+	public void setInMemory(boolean inMemory) {
+		this.inMemory = inMemory;
+	}
+
+	public boolean isCompact() {
+		return compact;
+	}
+
+	public void setCompact(boolean compact) {
+		this.compact = compact;
+	}
+
 	/**
 	 * add concept
 	 * @param term
@@ -77,38 +106,72 @@ public class ConceptImporter {
 	private void addConcept(NobleCoderTerminology term, Concept c) throws TerminologyException{
 		if(term == null || c == null)
 			return;
-		pcs.firePropertyChange(LOADING_MESSAGE,null,"importing concept "+c.getName()+" ..");
+		//pcs.firePropertyChange(LOADING_MESSAGE,null,"importing concept "+c.getName()+" ..");
 		term.addConcept(c);
 		// if not relations or no breader relations, then it is root
 		if(c.getRelationMap() == null || !c.getRelationMap().containsKey(Relation.BROADER))
 			term.addRoot(c.getCode());
 	}
-	
-	/**
-	 * add concept
-	 * @param term
-	 * @param c
-	 * @throws TerminologyException
-	 */
-	private void addConcept(Map<String,Concept> list , Concept c) throws TerminologyException{
-		if(c == null)
-			return;
-		list.put(c.getCode(),c);
-		pcs.firePropertyChange("Concept Added",null,c.getName());
-	}
+
 	
 	/**
 	 * load OBO file into terminology
 	 * @param file
 	 * @throws IOException
 	 */
-	public void loadOBO(NobleCoderTerminology term, File file) throws IOException, TerminologyException {
-		for(Concept c: loadOBO(file).values()){
-			addConcept(term, c);
+	public void loadOBO(NobleCoderTerminology term, File  file) throws IOException, TerminologyException {
+		loadOBO(term,Arrays.asList(file), null);
+	}
+	
+	
+	/**
+	 * load OBO file into terminology
+	 * @param file
+	 * @throws IOException
+	 */
+	public void loadOBO(NobleCoderTerminology terminology, List<File> files, String name) throws IOException, TerminologyException {
+		if(files == null || files.isEmpty())
+			return;
+		
+		// pick a default name if absent
+		if(name == null){
+			name = files.get(0).getName();
+			if(name.endsWith(".obo"))
+				name = name.substring(0,name.length()-4);
 		}
-		pcs.firePropertyChange(LOADING_MESSAGE,null,"Creating a Blacklist of High Frequency Words ...");
-		BlacklistHandler handler = new BlacklistHandler(term);
-		term.getStorage().getBlacklist().putAll(handler.getBlacklist());
+		
+		// load terminology with name
+		terminology.load(name);
+		
+		// load ontology from a set of files
+		for(File file: files){
+			pcs.firePropertyChange(LOADING_MESSAGE,null,"Loading "+file.getName()+" ...");
+			Map<String,Concept> content = loadOBO(file);
+			pcs.firePropertyChange(LOADING_TOTAL,null,content.size());
+			int i = 0;
+			for(Concept c: content.values()){
+				addConcept(terminology, c);
+				if(i % 10 == 0)
+					pcs.firePropertyChange(LOADING_PROGRESS,null,i++);
+			}
+		}
+		
+		if(!compact){
+			pcs.firePropertyChange(LOADING_MESSAGE,null,"Creating a Blacklist of High Frequency Words ...");
+			BlacklistHandler handler = new BlacklistHandler(terminology);
+			terminology.getStorage().getBlacklist().putAll(handler.getBlacklist());
+		}
+		
+		// save
+		if(!isInMemory()){
+			terminology.save();
+			terminology.getStorage().getInfoMap().put("status","done");
+		}
+		
+		// compact terminology
+		if(compact){
+			compact(terminology);
+		}
 	}
 	
 	/**
@@ -130,7 +193,8 @@ public class ConceptImporter {
 			Pattern p = Pattern.compile("\"(.*)\"\\s*([A-Z_]*)\\s*(.*)?\\[.*\\]");
 			for(String l=r.readLine();l != null;l=r.readLine()){
 				if("[Term]".equals(l.trim())){
-					addConcept(list,c);
+					if(c != null)
+						list.put(c.getCode(),c);
 					c = new Concept("X");
 					c.addSource(src);
 				}else if(c != null){
@@ -203,10 +267,8 @@ public class ConceptImporter {
 					src.setDescription(l.substring("default-namespace:".length()+1).trim());
 				}
 			}
-			addConcept(list,c);
+			list.put(c.getCode(),c);
 		}catch(IOException ex){
-			throw ex;
-		}catch(TerminologyException ex){
 			throw ex;
 		}finally{
 			if(r != null)
@@ -225,15 +287,7 @@ public class ConceptImporter {
 		loadOntology(term,ontology,null);
 	}
 	
-	/**
-	 * load index finder tables from an IOntology object
-	 * @param ontology
-	 * @throws IOException
-	 * @throws TerminologyException 
-	 */
-	public void loadOntology(NobleCoderTerminology term, IOntology ontology, String name) throws IOException, TerminologyException, IOntologyException {
-		loadOntology(term,ontology,name,false,false);
-	}
+
 	
 	/**
 	 * load index finder tables from an IOntology object
@@ -241,7 +295,8 @@ public class ConceptImporter {
 	 * @throws IOException
 	 * @throws TerminologyException 
 	 */
-	public void loadOntology(NobleCoderTerminology term, IOntology ontology, String name, boolean inmemory,boolean truncateURI) throws IOException, TerminologyException, IOntologyException {
+	public void loadOntology(NobleCoderTerminology term, IOntology ontology, String name) throws IOException, TerminologyException, IOntologyException {
+		boolean inmemory = isInMemory();
 		name = (name != null)?name:ontology.getName();
 		
 		// clear tables
@@ -257,14 +312,15 @@ public class ConceptImporter {
 		if("done".equals(storage.getInfoMap().get("status")))
 			return;
 		
-		
 		// handle memory nightmare (save when you reach 90%)
+		/*
 		final NobleCoderTerminology t = term;
 		MemoryManager.setMemoryThreshold(new Runnable(){
 			public void run() {
 				t.crash();
 			}
 		},0.95);
+		*/
 		
 		// load classes for the very first time
 		pcs.firePropertyChange(LOADING_MESSAGE,null,"Loading Ontology "+ontology.getName()+" from "+ontology.getLocation()+" ...");
@@ -281,23 +337,18 @@ public class ConceptImporter {
 		
 		// get all classes
 		pcs.firePropertyChange(LOADING_MESSAGE,null,"Iterating Over Ontology Classes ...");
-		pcs.firePropertyChange(LOADING_TOTAL,null,0);
 		IResourceIterator it = ontology.getAllClasses();
+		pcs.firePropertyChange(LOADING_TOTAL,null,it.getTotal());
+		
 		int i = 0;
-		int offset = 0;
-		if(storage.getInfoMap().containsKey("offset"))
-			offset = Integer.parseInt(storage.getInfoMap().get("offset"));
 		while(it.hasNext()){
 			i++;
-			// skip if we have an offset left over from previous load
-			//if(i< offset)
-			//	continue;
 			
 			IClass cls = (IClass)it.next();
 			if(cls == null)
 				continue;
 			
-			String code = getCode(cls,truncateURI);
+			String code = getCode(cls,false);
 			if(storage.getConceptMap().containsKey(code))
 				continue;
 			
@@ -307,16 +358,16 @@ public class ConceptImporter {
 			
 			// fix sources
 			for(Source sr: concept.getSources())
-				sr.setCode(getCode(sr.getCode(),truncateURI));
+				sr.setCode(getCode(sr.getCode(),false));
 			
 			// add relations to concept
 			for(IClass c: cls.getDirectSuperClasses()){
-				concept.addRelatedConcept(Relation.BROADER,getCode(c,truncateURI));
+				concept.addRelatedConcept(Relation.BROADER,getCode(c,false));
 			}
 			
 			// add relations to concept
 			for(IClass c: cls.getDirectSubClasses()){
-				concept.addRelatedConcept(Relation.NARROWER,getCode(c,truncateURI));
+				concept.addRelatedConcept(Relation.NARROWER,getCode(c,false));
 			}
 						
 			// add concept
@@ -330,15 +381,23 @@ public class ConceptImporter {
 			storage.getInfoMap().put("offset",""+i);
 		}
 		for(IClass r: ontology.getRootClasses())
-			storage.getRootMap().put(getCode(r,truncateURI),"");
+			storage.getRootMap().put(getCode(r,false),"");
 		
-		pcs.firePropertyChange(LOADING_MESSAGE,null,"Creating a Blacklist of High Frequency Words ...");
-		BlacklistHandler handler = new BlacklistHandler(term);
-		storage.getBlacklist().putAll(handler.getBlacklist());
+		// if need to compact, then compact, else create a blacklist
+		if(!compact){
+			pcs.firePropertyChange(LOADING_MESSAGE,null,"Creating a Blacklist of High Frequency Words ...");
+			BlacklistHandler handler = new BlacklistHandler(term);
+			storage.getBlacklist().putAll(handler.getBlacklist());
+		}
 		
 		if(!inmemory){
 			term.save();
 			storage.getInfoMap().put("status","done");
+		}
+		
+		// compact terminology
+		if(compact){
+			compact(term);
 		}
 	}
 
@@ -360,79 +419,40 @@ public class ConceptImporter {
 	 * @throws Exception
 	 */
 	public void loadText(NobleCoderTerminology term, File file,String name) throws Exception {
-		// load tables
+		loadText(term, file, name,null);
+	}
+	
+	
+	/**
+	 * load terms file
+	 * @param file
+	 * @throws Exception
+	 */
+	public void loadText(NobleCoderTerminology term, File file,String name, Terminology meta) throws Exception {
+		// get the file name 
 		name = (name != null)?name:file.getName();
 		
 		// strip suffix
 		if(name.endsWith(".txt"))
 			name = name.substring(0,name.length()-".txt".length());
 		
-		term.load(name);
-		NobleCoderTerminology.Storage storage = term.getStorage();
+		// initialize the ontology
+		IOntology ontology = OOntology.createOntology(URI.create(OntologyUtils.DEFAULT_ONTOLOGY_BASE_URL+name+".owl"));
+		ontology.addImportedOntology(OOntology.loadOntology(new URL(OntologyUtils.TERMINOLOGY_CORE)));
 		
-		// check if already loaded
-		if("done".equals(storage.getInfoMap().get("status")))
-			return;			
-				
-		// handle memory nightmare (save when you reach 90%)
-		final NobleCoderTerminology t = term;
-		MemoryManager.setMemoryThreshold(new Runnable(){
-			public void run() {
-				t.crash();
-			}
-		},0.95);
-		
+	
 		// load classes for the very first time
 		pcs.firePropertyChange(LOADING_MESSAGE,null,"Loading Text from "+file.getAbsolutePath()+" ...");
-		
-		// save meta information
-		storage.getInfoMap().put("name",name);
-		storage.getInfoMap().put("location",file.getAbsolutePath());
-		//storage.getInfoMap().put("stem.words",""+stemWords);
-		
-		
-		// old format
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		Concept c = new Concept("_");
-		List<String> synonyms = new ArrayList<String>();
-		int code = 0;
-		for(String line=reader.readLine();line != null; line=reader.readLine()){
-			line = line.trim();
-			
-			// junk is a concept delimeter
-			if(line.length() == 0 || line.matches("_+") || line.matches("\\d+")){
-				// add previous concept
-				if(c != null && synonyms != null && synonyms.size() > 0){
-					c.setName(synonyms.get(0));
-					c.setCode(""+(++code));
-					c.setSynonyms(synonyms.toArray(new String [0]));
-					term.addConcept(c);
-				}
-				// start new concept
-				c = new Concept("_");
-				synonyms = new ArrayList<String>();
-			}else{
-				synonyms.add(line);
-			}
-		}
-		reader.close();
+
 		
 		// create two root classes
-		//TODO: implement well for tab delimeted synonym bar seperated file
-		/*
-		IClass term = ontology.createClass("Terminology");
-		term.addLabel("Terminology");
-		IClass attributes = term.createSubClass("Attributes");
-		attributes.addLabel("Attributes");
 		Stack<IClass> parentStack = new Stack<IClass>();
-		parentStack.push(term);
+		parentStack.push(ontology.getRoot());
 		String lastLine = null;
 		IClass lastClass = null;
 		BufferedReader r = new BufferedReader(new FileReader(file));
 		for(String line = r.readLine(); line != null; line = r.readLine()){
 			if(line.trim().startsWith("#") || line.trim().length() == 0){
-				//includ children
-				processOptions(line);
 				continue;
 			}
 			
@@ -452,7 +472,7 @@ public class ConceptImporter {
 			}
 			
 			IClass parent = parentStack.peek();
-			IClass cls = createClass(line,parent); 
+			IClass cls = createClass(line,parent, meta); 
 			
 			// save for next iteration
 			lastClass = cls;
@@ -461,23 +481,67 @@ public class ConceptImporter {
 		r.close();
 		
 		
-		*/
+		// save ontology
+		pcs.firePropertyChange(LOADING_MESSAGE,null,"Saving Ontology ...");
+		ontology.write(new FileOutputStream(new File(file.getParentFile(),name+".owl")),IOntology.OWL_FORMAT);
 		
-		// handle last concept
-		if(c != null && synonyms != null && synonyms.size() > 0){
-			c.setName(synonyms.get(0));
-			c.setCode(""+(++code));
-			c.setSynonyms(synonyms.toArray(new String [0]));
-			term.addConcept(c);
-		}
-		
-		// save terminology
-		pcs.firePropertyChange(LOADING_MESSAGE,null,"Saving Concept Information ...");
-		storage.getInfoMap().put("status","done");
-		term.save();
-		
+		// now load as an ontology
+		loadOntology(term, ontology);
 	}
 	
+	
+	/**
+	 * create a class from a given line of text
+	 * @param line - String that has a sperated list of synonyms
+	 * @param parent
+	 * @param meta
+	 * @return
+	 * @throws TerminologyException 
+	 */
+	private IClass createClass(String line, IClass parent, Terminology umls) throws TerminologyException {
+		// split line into synonyms
+		String [] synonyms = line.split("[\\|;,]");
+		
+		// create class
+		String name = synonyms[0].trim();
+		IOntology ont = parent.getOntology();
+		IClass cls = parent.createSubClass(OntologyUtils.toResourceName(name));
+		cls.addLabel(name);
+		
+		// process other synonyms
+		if(synonyms.length > 1){
+			for(String txt: synonyms){
+				txt = txt.trim();
+				
+				// prefered term
+				if(txt.equals(name)){
+					cls.addPropertyValue(OntologyUtils.getOrCreateProperty(ont,OntologyUtils.PREF_TERM),txt);
+				}else if(OntologyUtils.isCUI(txt)){
+					cls.addPropertyValue(OntologyUtils.getOrCreateProperty(ont,OntologyUtils.ALT_CODE),txt);
+				}else if(OntologyUtils.isTUI(txt)){
+					cls.addPropertyValue(OntologyUtils.getOrCreateProperty(ont,OntologyUtils.SEM_TYPE),txt);	
+				}else{
+					cls.addPropertyValue(OntologyUtils.getOrCreateProperty(ont,OntologyUtils.SYNONYM),txt);	
+				}
+			}
+		}
+		
+		// lookup in metathesaurus
+		if(umls != null){
+			for(String text: synonyms){
+				text = text.trim();
+				for(Concept c: umls.search(text)){
+					// make sure that concept matches completly
+					if(c.getMatchedTerm().equals(text)){
+						OntologyUtils.copyConceptToClass(c, cls);
+					}
+				}
+			}
+		}
+		
+		return cls;
+	}
+
 	/**
 	 * load from RRF files (Rich Release Files)
 	 * This is a common distribution method for UMLS and NCI Meta
@@ -489,6 +553,7 @@ public class ConceptImporter {
 		params.put("languages",Arrays.asList("ENG"));
 		loadRRF(term,dir,params);
 	}
+	
 	
 	/**
 	 * load from RRF files (Rich Release Files)
@@ -502,21 +567,7 @@ public class ConceptImporter {
 	 * hierarchySources - only include hierarhy information from a list of sources
 	 */
 	public void loadRRF(NobleCoderTerminology terminology,File dir,Map<String,List<String>> params) throws FileNotFoundException, IOException, TerminologyException {
-		loadRRF(terminology, dir, params,false);
-	}
-	
-	/**
-	 * load from RRF files (Rich Release Files)
-	 * This is a common distribution method for UMLS and NCI Meta
-	 * @param directory that contains MRCONSO.RRF, MRDEF.RRF, MRSTY.RRF etc...
-	 * @param Map<String,List<String>> filter property object, where some properties are:
-	 * name - change ontology name
-	 * languages - only include languages in a given list languages
-	 * sources - only include concepts from a given list of sources
-	 * semanticTypes - filter result by a list of semantic types attached
-	 * hierarchySources - only include hierarhy information from a list of sources
-	 */
-	public void loadRRF(NobleCoderTerminology terminology,File dir,Map<String,List<String>> params,boolean inmemory) throws FileNotFoundException, IOException, TerminologyException {
+		boolean inmemory = isInMemory();
 		long time = System.currentTimeMillis();
 		
 		// get known params
@@ -888,9 +939,9 @@ public class ConceptImporter {
 						terms.add(l.trim());
 					}
 					rd.close();
-					
+				
 					// set words
-					terminology.setWordTerms(word,terms);
+					saveWordTerms(storage,word,terms);
 					storage.getInfoMap().put(RRFile,""+i);
 				}
 			}else{
@@ -1135,9 +1186,12 @@ public class ConceptImporter {
 		}
 		
 		// generate blacklist
-		pcs.firePropertyChange(LOADING_MESSAGE,null,"Creating a Blacklist of High Frequency Words ...");
-		BlacklistHandler handler = new BlacklistHandler(terminology);
-		storage.getBlacklist().putAll(handler.getBlacklist());
+		if(!compact){
+			pcs.firePropertyChange(LOADING_MESSAGE,null,"Creating a Blacklist of High Frequency Words ...");
+			BlacklistHandler handler = new BlacklistHandler(terminology);
+			storage.getBlacklist().putAll(handler.getBlacklist());
+		}
+		
 		
 		// last save
 		pcs.firePropertyChange(LOADING_MESSAGE,null,"Saving Concept Information ...");
@@ -1154,12 +1208,18 @@ public class ConceptImporter {
 			tempDir.delete();
 		}
 		
+		
+		// compact terminology
+		if(compact){
+			compact(terminology);
+		}
+
 		// serialize boject if appropriate
-		if(inmemory){
+		/*if(inmemory){
 			File f = new File(location,NobleCoderTerminology.MEM_FILE);
 			pcs.firePropertyChange(LOADING_MESSAGE,null,"Saving Serialized Object to ... "+f.getAbsolutePath());
 			storage.saveObject(f);
-		}
+		}*/
 		pcs.firePropertyChange(LOADING_MESSAGE,null,"Total Load Time: "+(System.currentTimeMillis()-time)/60000.0+" minutes");
 	}
 	
@@ -1189,7 +1249,8 @@ public class ConceptImporter {
 		String rarest = null;
 		int rarestTermCount = Integer.MAX_VALUE;
 		for(String word: TextTools.getWords(term)){
-			int i = storage.getWordStatMap().get(word).termCount;
+			WordStat st = storage.getWordStatMap().get(word);
+			int i = (st != null)?st.termCount:Integer.MAX_VALUE;
 			if( i < rarestTermCount){
 				rarest = word;
 				rarestTermCount = i;
@@ -1198,7 +1259,7 @@ public class ConceptImporter {
 		return rarest;
 	}
 	
-	public static void saveTemporaryTermFile(File location, String word, Collection<String> termList) throws IOException{
+	private void saveTemporaryTermFile(File location, String word, Collection<String> termList) throws IOException{
 		if(word == null)
 			return;
 		// if windows OS, check for some speccial files
@@ -1220,6 +1281,71 @@ public class ConceptImporter {
 	
 	
 	/**
+	 * add entry to word table
+	 * @param word
+	 * @param terms
+	 */
+	public void saveWordTerms(NobleCoderTerminology.Storage storage, String word,Set<String> terms){
+		//TODO: it would be more efficient to do the rare-word index feature here instead of using compact function after import
+		
+		// filter terms to only include those that contain a given word
+		File location = storage.getLocation();
+		Set<String> termList = filterTerms(word,terms);
+		
+		// if in temp word folder mode, save in temp directory instead of map
+		if(storage.useTempWordFolder && location != null && location.exists()){
+			try {
+				saveTemporaryTermFile(location, word, termList);
+			} catch (IOException e) {
+				pcs.firePropertyChange(LOADING_MESSAGE,null,"Warning: failed to create file \""+word+"\", reason: "+e.getMessage());
+			}
+		// else do the normal save to MAP	
+		}else{
+			if(storage.getWordMap().containsKey(word)){
+				termList.addAll(storage.getWordMap().get(word));
+			}
+			try{
+				storage.getWordMap().put(word,termList);
+				storage.commit(storage.getWordMap());
+			}catch(IllegalArgumentException e ){
+				storage.getWordMap().put(word,new HashSet<String>(Collections.singleton(word)));
+				pcs.firePropertyChange(LOADING_MESSAGE,null,"Warning: failed to insert word \""+word+"\", reason: "+e.getMessage());
+				
+			}
+			// if word already existed, subtract previous value from the total
+			if(storage.getWordStatMap().containsKey(word))
+				storage.totalTermsPerWord -= storage.getWordStatMap().get(word).termCount;
+			
+			WordStat ws = new WordStat();
+			ws.termCount = termList.size();
+			ws.isTerm = termList.contains(word);
+			storage.getWordStatMap().put(word,ws);
+			storage.totalTermsPerWord += termList.size();
+			if(termList.size() > storage.maxTermsPerWord)
+				storage.maxTermsPerWord = termList.size();
+			
+		}
+	}
+	
+	
+	/**
+	 * only return terms where given word occures
+	 * @param workd
+	 * @param terms
+	 * @return
+	 */
+	private Set<String> filterTerms(String word, Set<String> terms){
+		Set<String> result = new HashSet<String>();
+		for(String t: terms){
+			if(t.contains(word))
+				result.add(t);
+		}
+		return result;
+	}
+	
+	
+	
+	/**
 	 * compact terminology 
 	 * @param term
 	 */
@@ -1231,6 +1357,8 @@ public class ConceptImporter {
 		// first create a temporary term files
 		storage.useTempWordFolder = true;
 		pcs.firePropertyChange(LOADING_MESSAGE,null,"Saving terms as files ...");
+		pcs.firePropertyChange(LOADING_TOTAL,null,storage.getTermMap().size());
+		
 		int i=0;
 		for(String term:  storage.getTermMap().keySet()){
 			// get rarest word
@@ -1261,8 +1389,10 @@ public class ConceptImporter {
 		pcs.firePropertyChange(LOADING_MESSAGE,null,"Loading terms into datastructure ...");
 		storage.useTempWordFolder = false;
 		File tempDir = new File(location,NobleCoderTerminology.TEMP_WORD_DIR);
+		File [] fileList = tempDir.listFiles();
+		pcs.firePropertyChange(LOADING_TOTAL,null,fileList.length);
 		i = 0;
-		for(File f: tempDir.listFiles()){
+		for(File f: fileList){
 				
 			//load file content
 			String word = f.getName();
@@ -1274,7 +1404,7 @@ public class ConceptImporter {
 			rd.close();
 			
 			// set words
-			terminology.setWordTerms(word,terms);
+			saveWordTerms(storage,word,terms);
 
 			
 			// progress bar
@@ -1283,7 +1413,6 @@ public class ConceptImporter {
 			}
 			i++;
 		}
-		
 		// check the fact that it has been compacted
 		storage.getInfoMap().put("compacted", "true");
 		
@@ -1305,7 +1434,7 @@ public class ConceptImporter {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		File dir = new File("/home/tseytlin/Data/Coropora/craft-1.0/ontologies");
+		/*File dir = new File("/home/tseytlin/Data/Coropora/craft-1.0/ontologies");
 		//File out = new File("/home/tseytlin/Data/Coropora/craft-1.0/terminologies");
 		File out = new File("/home/tseytlin/Data/Coropora/CRAFT_ORF_update");
 		//File out = new File("/home/tseytlin/Data/Coropora/CRAFT_RRF_update");
@@ -1316,7 +1445,7 @@ public class ConceptImporter {
 				//ConceptExporter.getInstances().exportRRF(concepts,out);
 				ConceptExporter.getInstances().exportORF(concepts,out);
 			}
-		}
+		}*/
 
 	}
 

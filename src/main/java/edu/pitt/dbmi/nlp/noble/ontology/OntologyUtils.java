@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -181,9 +182,12 @@ public class OntologyUtils {
 			resourceName = resourceName.substring(i+1);
 	
 		
+		// split up camel case notation
+		resourceName = resourceName.replaceAll("([a-z]+)([A-Z][a-z]+)","$1 $2");
+		
 		// possible lowercase values to make things look prettier
-		if(!resourceName.matches("[A-Z_\\-\\'0-9]+") && !resourceName.matches("[a-z][A-Z_\\-\\'0-9]+[\\w\\-]*"))
-			resourceName = resourceName.toLowerCase();
+		//if(!resourceName.matches("[A-Z_\\-\\'0-9]+") && !resourceName.matches("[a-z][A-Z_\\-\\'0-9]+[\\w\\-]*"))
+		//	resourceName = resourceName.toLowerCase();
 			
 		// now replace all underscores with spaces
 		return resourceName.replaceAll("_"," ");
@@ -301,5 +305,10 @@ public class OntologyUtils {
 	public static boolean isTUI(String text){
 		return text.matches("T\\d{2,3}");
 	}
-	
+	/*public static void main(String [] args){
+		for(String s: Arrays.asList("http://hello.com/world","http://hello.com/world.owl#happyFeet","prefix:World","melanoma","MalignantMelanoma","pT2a","hello_world","asdf asdf","helloWorld","DiseaseDisorder"))
+			System.out.println(s+" -> "+toPrettyName(s));
+		
+		
+	}*/
 }

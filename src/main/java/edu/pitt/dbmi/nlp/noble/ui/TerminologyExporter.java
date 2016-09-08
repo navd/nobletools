@@ -816,7 +816,7 @@ public class TerminologyExporter implements ActionListener {
 			return;
 		}
 		IOntology ont = parent.getOntology();
-		String clsName = getClassName(c.getName());
+		String clsName = OntologyUtils.toResourceName(c.getName());
 		IClass cls = ont.getClass(clsName);
 		// if class exists, then we have a cycle, just add a parent and quit
 		if(cls != null){
@@ -981,15 +981,6 @@ public class TerminologyExporter implements ActionListener {
 		return true;
 	}
 	
-	
-	/**
-	 * create ontology friendly class name
-	 * @param name
-	 * @return
-	 */
-	private String getClassName(String name){
-		return name.trim().replaceAll("\\s*\\(.+\\)\\s*","").replaceAll("\\W","_").replaceAll("_+","_");
-	}
 	
 	/**
 	 * @param args

@@ -151,8 +151,7 @@ public class ConceptImporter {
 			int i = 0;
 			for(Concept c: content.values()){
 				addConcept(terminology, c);
-				if(i % 10 == 0)
-					pcs.firePropertyChange(LOADING_PROGRESS,null,i++);
+				pcs.firePropertyChange(LOADING_PROGRESS,null,i++);
 			}
 		}
 		
@@ -185,8 +184,9 @@ public class ConceptImporter {
 		if(name.endsWith(".obo"))
 			name = name.substring(0,name.length()-4);
 		Source src = Source.getSource(name);
-		
+		pcs.firePropertyChange(LOADING_TOTAL,null,getOBOTermCount(file));
 		BufferedReader r = null;
+		int count = 0;
 		try{
 			r = new BufferedReader(new FileReader(file));
 			Concept c = null;
@@ -197,6 +197,7 @@ public class ConceptImporter {
 						list.put(c.getCode(),c);
 					c = new Concept("X");
 					c.addSource(src);
+					pcs.firePropertyChange(LOADING_PROGRESS,null,count++);
 				}else if(c != null){
 					int i = l.indexOf(':');
 					if(i > -1){
@@ -277,6 +278,18 @@ public class ConceptImporter {
 		return list;
 	}
 	
+	private int getOBOTermCount(File file) throws IOException {
+		int count = 0;
+		BufferedReader r = new BufferedReader(new FileReader(file));
+		for(String l=r.readLine();l != null;l=r.readLine()){
+			if("[Term]".equals(l.trim())){
+				count++;
+			}
+		}
+		r.close();
+		return count;
+	}
+
 	/**
 	 * load index finder tables from an IOntology object
 	 * @param ontology
@@ -374,10 +387,8 @@ public class ConceptImporter {
 			term.addConcept(concept);
 			
 			// commit ever so often
-			if((i % 3000) == 0){
-				pcs.firePropertyChange(LOADING_PROGRESS,null,i);
-				//save();
-			}
+			pcs.firePropertyChange(LOADING_PROGRESS,null,i);
+			
 			storage.getInfoMap().put("offset",""+i);
 		}
 		for(IClass r: ontology.getRootClasses())
@@ -391,8 +402,8 @@ public class ConceptImporter {
 		}
 		
 		if(!inmemory){
-			term.save();
 			storage.getInfoMap().put("status","done");
+			term.save();
 		}
 		
 		// compact terminology
@@ -801,8 +812,8 @@ public class ConceptImporter {
 					Source source = Source.getSource(src);
 					
 					// display progress bar
+					pcs.firePropertyChange(LOADING_PROGRESS,null,i);
 					if((i % step) == 0){
-						pcs.firePropertyChange(LOADING_PROGRESS,null,i);
 						storage.commit(storage.getInfoMap());
 						storage.commit(storage.getTermMap());
 						storage.commit(storage.getRegexMap());
@@ -926,9 +937,9 @@ public class ConceptImporter {
 						continue;
 					}
 					// display progress bar
-					if((i % (files.length/100)) == 0){
-						pcs.firePropertyChange(LOADING_PROGRESS,null,i);
-					}
+					//if((i % (files.length/100)) == 0){
+					pcs.firePropertyChange(LOADING_PROGRESS,null,i);
+					//}
 					i++;
 					
 					//load file content
@@ -1006,8 +1017,8 @@ public class ConceptImporter {
 						// replace with new concept
 						storage.getConceptMap().put(cui,c.getContent());
 					}
-					if((i % step) == 0)
-						pcs.firePropertyChange(LOADING_PROGRESS,null,i);
+					//if((i % step) == 0)
+					pcs.firePropertyChange(LOADING_PROGRESS,null,i);
 				}
 				i++;
 				storage.getInfoMap().put(RRFile,""+i);
@@ -1055,8 +1066,8 @@ public class ConceptImporter {
 						storage.getConceptMap().put(cui,c.getContent());
 					}
 				}
-				if((i % step) == 0)
-					pcs.firePropertyChange(LOADING_PROGRESS,null,i);
+				//if((i % step) == 0)
+				pcs.firePropertyChange(LOADING_PROGRESS,null,i);
 				i++;
 				storage.getInfoMap().put(RRFile,""+i);
 			}
@@ -1135,8 +1146,8 @@ public class ConceptImporter {
 						}
 					}	
 				}
-				if((i % step) == 0)
-					pcs.firePropertyChange(LOADING_PROGRESS,null,i);
+				//if((i % step) == 0)
+				pcs.firePropertyChange(LOADING_PROGRESS,null,i);
 				i++;
 				storage.getInfoMap().put(RRFile,""+i);
 			}
@@ -1176,8 +1187,8 @@ public class ConceptImporter {
 					if(issource)
 						storage.getRootMap().put(c.code,"");
 				}*/
-				if((i % step) == 0)
-					pcs.firePropertyChange(LOADING_PROGRESS,null,i);
+				//if((i % step) == 0)
+				pcs.firePropertyChange(LOADING_PROGRESS,null,i);
 				i++;
 				storage.getInfoMap().put(RRFile,""+i);
 			}
@@ -1390,28 +1401,30 @@ public class ConceptImporter {
 		storage.useTempWordFolder = false;
 		File tempDir = new File(location,NobleCoderTerminology.TEMP_WORD_DIR);
 		File [] fileList = tempDir.listFiles();
-		pcs.firePropertyChange(LOADING_TOTAL,null,fileList.length);
-		i = 0;
-		for(File f: fileList){
+		if(fileList != null){
+			pcs.firePropertyChange(LOADING_TOTAL,null,fileList.length);
+			i = 0;
+			for(File f: fileList){
+					
+				//load file content
+				String word = f.getName();
+				Set<String> terms = new HashSet<String>();
+				BufferedReader rd = new BufferedReader(new FileReader(f));
+				for(String l = rd.readLine();l != null; l = rd.readLine()){
+					terms.add(l.trim());
+				}
+				rd.close();
 				
-			//load file content
-			String word = f.getName();
-			Set<String> terms = new HashSet<String>();
-			BufferedReader rd = new BufferedReader(new FileReader(f));
-			for(String l = rd.readLine();l != null; l = rd.readLine()){
-				terms.add(l.trim());
+				// set words
+				saveWordTerms(storage,word,terms);
+	
+				
+				// progress bar
+				if((i % (n/100)) == 0){
+					pcs.firePropertyChange(LOADING_PROGRESS,null,i);
+				}
+				i++;
 			}
-			rd.close();
-			
-			// set words
-			saveWordTerms(storage,word,terms);
-
-			
-			// progress bar
-			if((i % (n/100)) == 0){
-				pcs.firePropertyChange(LOADING_PROGRESS,null,i);
-			}
-			i++;
 		}
 		// check the fact that it has been compacted
 		storage.getInfoMap().put("compacted", "true");

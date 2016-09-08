@@ -11,6 +11,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IProperty;
 import edu.pitt.dbmi.nlp.noble.ontology.IResource;
+import edu.pitt.dbmi.nlp.noble.ontology.OntologyUtils;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import edu.pitt.dbmi.nlp.noble.util.XMLUtils;
 
@@ -327,10 +328,7 @@ public class Concept implements  Serializable, Comparable<Concept> {
 		
 		// figure out name
 		String name = cls.getName();
-		int i = name.indexOf(":");
-		if(i > -1)
-			name = name.substring(i+1);
-		name =  name.replaceAll("_"," ").toLowerCase();
+		name =  OntologyUtils.toPrettyName(name);
 		
 		// assign code and name
 		this.code = cls.getName(); //""+cls.getURI();
@@ -372,6 +370,8 @@ public class Concept implements  Serializable, Comparable<Concept> {
 						addSynonym(s);
 					}
 				}
+			}else if(pname.matches("(?i)pref.*(term|label).*")){
+				setName(""+cls.getPropertyValue(p));
 			}else if(pname.matches("(?i).*(abbr|synonym|term|variant|label|name|regex|misspell).*") && !pname.toLowerCase().startsWith("legacy")){
 				//((preferred|legacy)_)?
 				for(Object o: cls.getPropertyValues(p)){

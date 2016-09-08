@@ -35,7 +35,7 @@ public class DefaultRepository implements IRepository{
 	private File terminologyLocation,ontologyLocation;
 	
 	public DefaultRepository(){
-		terminologyLocation = DEFAULT_TERMINOLOGY_LOCATION;
+		terminologyLocation = NobleCoderTerminology.getPersistenceDirectory();
 		ontologyLocation = DEFAULT_ONTOLOGY_LOCATION;
 	}
 	

@@ -534,6 +534,7 @@ public class TerminologyImporter implements ItemListener, ActionListener, Proper
 		panel.add(metathesaurusList);
 		panel.add(Box.createRigidArea(new Dimension(20,20)));
 		panel.add(getCommonOptions());
+		
 		return panel;
 	}
 	
